@@ -62,42 +62,11 @@
 
 #include <toxprpl.h>
 
-#define _(msg) msg // might add gettext later
-
-#define DEFAULT_REQUEST_MESSAGE _("Please allow me to add you as a friend!")
-
-
-static const char* g_HEX_CHARS = "0123456789abcdef";
-
-#define TOXPRPL_MAX_STATUS          4
-#define TOXPRPL_STATUS_ONLINE       0
-#define TOXPRPL_STATUS_AWAY         1
-#define TOXPRPL_STATUS_BUSY         2
-#define TOXPRPL_STATUS_OFFLINE      3
-
-static toxprpl_status toxprpl_statuses[] =
-        {
-                {
-                        PURPLE_STATUS_AVAILABLE, TOXPRPL_STATUS_ONLINE,
-                        "tox_online", _("Online")
-                },
-                {
-                        PURPLE_STATUS_AWAY, TOXPRPL_STATUS_AWAY,
-                        "tox_away", _("Away")
-                },
-                {
-                        PURPLE_STATUS_UNAVAILABLE, TOXPRPL_STATUS_BUSY,
-                        "tox_busy", _("Busy")
-                },
-                {
-                        PURPLE_STATUS_OFFLINE, TOXPRPL_STATUS_OFFLINE,
-                        "tox_offline", _("Offline")
-                }
-        };
-
 /*
  * stores offline messages that haven't been delivered yet. maps username
  * (char *) to GList * of GOfflineMessages. initialized in toxprpl_init.
+ *
+ * TODO extract?
  */
 GHashTable* goffline_messages = NULL;
 
@@ -118,99 +87,35 @@ static void toxprpl_query_buddy_info(gpointer data, gpointer user_data);
 
 static void toxprpl_set_status(PurpleAccount* account, PurpleStatus* status);
 
-// utilitis
+// Start of file transfer functions ------------------------------------------------------------------------------------
+
+/*
+ * File transfer logic
+ * Implementation resides in `impl/xfers.c`
+ */
+PurpleXfer* toxprpl_find_xfer(PurpleConnection*, int, uint8_t);
+void on_file_control(Tox*, int32_t, uint8_t, uint8_t, uint8_t, const uint8_t*, uint16_t, void*);
+void on_file_send_request(Tox*, int32_t, uint8_t, uint64_t, const uint8_t*, uint16_t, void*);
+void on_file_data(Tox*, int32_t, uint8_t, const uint8_t*, uint16_t, void*);
+
+gboolean toxprpl_can_receive_file(PurpleConnection*, const char*);
+gboolean toxprpl_xfer_idle_write(toxprpl_idle_write_data*);
+void toxprpl_xfer_start(PurpleXfer*);
+void toxprpl_xfer_init(PurpleXfer*);
+gssize toxprpl_xfer_write(const guchar*, size_t, PurpleXfer*);
+gssize toxprpl_xfer_read(guchar**, PurpleXfer*);
+void toxprpl_xfer_free(PurpleXfer*);
+void toxprpl_xfer_cancel_send(PurpleXfer*);
+void toxprpl_xfer_cancel_recv(PurpleXfer*);
+void toxprpl_xfer_request_denied(PurpleXfer*);
+void toxprpl_xfer_end(PurpleXfer*);
+PurpleXfer* toxprpl_new_xfer(PurpleConnection*, const gchar*);
+PurpleXfer* toxprpl_new_xfer_receive(PurpleConnection*, const char*, int, int, const goffset, const char*);
+void toxprpl_send_file(PurpleConnection*, const char*, const char*);
+
+// End of file transfer functions --------------------------------------------------------------------------------------
 
 // returned buffer must be freed by the caller
-static char* toxprpl_data_to_hex_string(const unsigned char* data,
-                                        const size_t len) {
-    unsigned char* chars;
-    unsigned char hi, lo;
-    size_t i;
-    char* buf = malloc((len * 2) + 1);
-    char* p = buf;
-    chars = (unsigned char*) data;
-    chars = (unsigned char*) data;
-    for (i = 0; i < len; i++) {
-        unsigned char c = chars[i];
-        hi = c >> 4;
-        lo = c & 0xF;
-        *p = g_HEX_CHARS[hi];
-        p++;
-        *p = g_HEX_CHARS[lo];
-        p++;
-    }
-    buf[len * 2] = '\0';
-    return buf;
-}
-
-unsigned char* toxprpl_hex_string_to_data(const char* s) {
-    size_t len = strlen(s);
-    unsigned char* buf = malloc(len / 2);
-    unsigned char* p = buf;
-
-    size_t i;
-    for (i = 0; i < len; i += 2) {
-        const char* chi = strchr(g_HEX_CHARS, g_ascii_tolower(s[i]));
-        const char* clo = strchr(g_HEX_CHARS, g_ascii_tolower(s[i + 1]));
-        int hi, lo;
-        if (chi) {
-            hi = chi - g_HEX_CHARS;
-        }
-        else {
-            hi = 0;
-        }
-
-        if (clo) {
-            lo = clo - g_HEX_CHARS;
-        }
-        else {
-            lo = 0;
-        }
-
-        unsigned char ch = (unsigned char) (hi << 4 | lo);
-        *p = ch;
-        p++;
-    }
-    return buf;
-}
-
-// stay independent from the lib
-static int toxprpl_get_status_index(Tox* tox, int fnum, TOX_USERSTATUS status) {
-    switch (status) {
-        case TOX_USERSTATUS_AWAY:
-            return TOXPRPL_STATUS_AWAY;
-        case TOX_USERSTATUS_BUSY:
-            return TOXPRPL_STATUS_BUSY;
-        case TOX_USERSTATUS_NONE:
-        case TOX_USERSTATUS_INVALID:
-        default:
-            if (fnum != -1) {
-                if (tox_get_friend_connection_status(tox, fnum) == 1) {
-                    return TOXPRPL_STATUS_ONLINE;
-                }
-            }
-    }
-    return TOXPRPL_STATUS_OFFLINE;
-}
-
-static TOX_USERSTATUS toxprpl_get_tox_status_from_id(const char* status_id) {
-    int i;
-    for (i = 0; i < TOXPRPL_MAX_STATUS; i++) {
-        if (strcmp(toxprpl_statuses[i].id, status_id) == 0) {
-            return toxprpl_statuses[i].tox_status;
-        }
-    }
-    return TOX_USERSTATUS_INVALID;
-}
-
-/* tox helpers */
-gchar* toxprpl_tox_bin_id_to_string(const uint8_t* bin_id) {
-    return toxprpl_data_to_hex_string(bin_id, TOX_CLIENT_ID_SIZE);
-}
-
-static gchar* toxprpl_tox_friend_id_to_string(uint8_t* bin_id) {
-    return toxprpl_data_to_hex_string(bin_id, TOX_FRIEND_ADDRESS_SIZE);
-}
 
 /* tox specific stuff */
 static void on_connectionstatus(Tox* tox, int32_t fnum, uint8_t status,
@@ -375,33 +280,7 @@ static void on_status_change(struct Tox* tox, int32_t friendnum,
     g_free(buddy_key);
 }
 
-// Start of file transfer functions ------------------------------------------------------------------------------------
 
-/*
- * File transfer logic
- * Implementation resides in `impl/xfers.c`
- */
-PurpleXfer* toxprpl_find_xfer(PurpleConnection*, int, uint8_t);
-void on_file_control(Tox*, int32_t, uint8_t, uint8_t, uint8_t, const uint8_t*, uint16_t, void*);
-void on_file_send_request(Tox*, int32_t, uint8_t, uint64_t, const uint8_t*, uint16_t, void*);
-void on_file_data(Tox*, int32_t, uint8_t, const uint8_t*, uint16_t, void*);
-
-gboolean toxprpl_can_receive_file(PurpleConnection*, const char*);
-gboolean toxprpl_xfer_idle_write(toxprpl_idle_write_data*);
-void toxprpl_xfer_start(PurpleXfer*);
-void toxprpl_xfer_init(PurpleXfer*);
-gssize toxprpl_xfer_write(const guchar*, size_t, PurpleXfer*);
-gssize toxprpl_xfer_read(guchar**, PurpleXfer*);
-void toxprpl_xfer_free(PurpleXfer*);
-void toxprpl_xfer_cancel_send(PurpleXfer*);
-void toxprpl_xfer_cancel_recv(PurpleXfer*);
-void toxprpl_xfer_request_denied(PurpleXfer*);
-void toxprpl_xfer_end(PurpleXfer*);
-PurpleXfer* toxprpl_new_xfer(PurpleConnection*, const gchar*);
-PurpleXfer* toxprpl_new_xfer_receive(PurpleConnection*, const char*, int, int, const goffset, const char*);
-void toxprpl_send_file(PurpleConnection*, const char*, const char*);
-
-// End of file transfer functions --------------------------------------------------------------------------------------
 
 void on_typing_change(Tox* tox, int32_t friendnum, uint8_t is_typing,
                       void* userdata) {

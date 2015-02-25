@@ -30,7 +30,16 @@
         return;                                  \
     }
 
-#include <tox/tox.h>
+
+#define _(msg) msg // might add gettext later
+
+#define DEFAULT_REQUEST_MESSAGE _("Please allow me to add you as a friend!")
+
+#define TOXPRPL_MAX_STATUS          4
+#define TOXPRPL_STATUS_ONLINE       0
+#define TOXPRPL_STATUS_AWAY         1
+#define TOXPRPL_STATUS_BUSY         2
+#define TOXPRPL_STATUS_OFFLINE      3
 
 /*
  * Pidgin bits
@@ -51,6 +60,29 @@
 #include <util.h>
 #include <version.h>
 
+#include <tox/tox.h>
+
 #include <toxprpl_data.h>
 
-gchar* toxprpl_tox_bin_id_to_string(const uint8_t* bin_id);
+// util.c start --------------------------------------------------------------------------------------------------------
+
+extern const char* g_HEX_CHARS;
+extern const toxprpl_status toxprpl_statuses[];
+
+/*
+ * Kitchen sink
+ */
+
+char* toxprpl_data_to_hex_string(const unsigned char*, const size_t);
+unsigned char* toxprpl_hex_string_to_data(const char*);
+int toxprpl_get_status_index(Tox*, int, TOX_USERSTATUS);
+TOX_USERSTATUS toxprpl_get_tox_status_from_id(const char*);
+
+/*
+ * Tox helpers
+ */
+
+gchar* toxprpl_tox_bin_id_to_string(const uint8_t*);
+gchar* toxprpl_tox_friend_id_to_string(uint8_t*);
+
+// util.c end ----------------------------------------------------------------------------------------------------------
