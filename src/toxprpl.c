@@ -30,6 +30,7 @@
 
 #include <errno.h>
 #include <sys/types.h>
+
 #ifdef __WIN32__
     #include <winsock2.h>
     #include <ws2tcpip.h>
@@ -48,6 +49,7 @@
 #endif
 
 #include <sys/stat.h>
+#include <unistd.h>
 #include <fcntl.h>
 
 #include <glib.h>
