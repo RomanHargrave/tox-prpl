@@ -58,6 +58,8 @@
 
 #define PURPLE_PLUGINS
 
+#include <toxprpl.h>
+
 #include <account.h>
 #include <accountopt.h>
 #include <blist.h>
@@ -1056,7 +1058,7 @@ static void toxprpl_login_after_setup(PurpleAccount *acct)
     purple_debug_info("toxprpl", "Will connect to %s:%d (%s)\n" ,
                       ip, port, key);
 
-    if (tox_bootstrap_from_address(tox, ip, htons(port), bin_str) == 0)
+    if (tox_bootstrap_from_address(tox, ip, TOXPRPL_USE_IPV6, htons(port), bin_str) == 0)
     {
         purple_connection_error_reason(gc,
                 PURPLE_CONNECTION_ERROR_NETWORK_ERROR,
