@@ -1,4 +1,28 @@
 #pragma once
+
+#include <tox/tox.h>
+
+/*
+ * Pidgin bits
+ */
+#include <account.h>
+#include <accountopt.h>
+#include <blist.h>
+#include <cmds.h>
+#include <conversation.h>
+#include <connection.h>
+#include <debug.h>
+#include <notify.h>
+#include <privacy.h>
+#include <prpl.h>
+#include <roomlist.h>
+#include <request.h>
+#include <status.h>
+#include <util.h>
+#include <version.h>
+
+#include <toxprpl_data.h>
+
 /*
  * Switch option that determines whether or not IPv6 support should be enabled when bootstrapping Tox
  */
@@ -16,3 +40,17 @@
 #define DEFAULT_NICKNAME    "ToxedPidgin"
 
 #define MAX_ACCOUNT_DATA_SIZE   1*1024*1024
+
+#define toxprpl_return_val_if_fail(expr, val)     \
+    if (!(expr))                                 \
+    {                                            \
+        return (val);                            \
+    }
+
+#define toxprpl_return_if_fail(expr)             \
+    if (!(expr))                                 \
+    {                                            \
+        return;                                  \
+    }
+
+gchar* toxprpl_tox_bin_id_to_string(const uint8_t* bin_id);

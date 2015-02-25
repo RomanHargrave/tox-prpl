@@ -24,7 +24,8 @@ set(LIBS ${LIBS}
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 
-set(SOURCE_FILES 
+set(SOURCE_FILES
+	src/impl/xfers.c
 	src/toxprpl.c)
 
 include_directories(include)
