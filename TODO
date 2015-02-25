@@ -1,0 +1,33 @@
+Todo list for RomanHargrave/tox-prpl
+
+Project Management
+    - CPackNSIS should be looked in to in order to keep in line with the former autotools setup
+    - Since I would assume that any Mac user who intends on both using a purple-based messenger, and
+        who intends on using this plugin will at least understand how to use a computer beyond dragging
+        and dropping things, I have no plans to implement some manner of easy-installation garbage for Mac,
+        if there was any previously. It's a *nix, and its users should know that.
+    - Stricter version declaration for libtox core
+
+Source Structure
+    - Separate functionality across files so that it is easier to locate things
+    - Look in to refactoring transactional structure names so that it is apparent that they are a type
+        (i.e.: tox_prpl_accept_friend_status becomes ToxPRPLAcceptFriendStatus) an added benefit is that
+        this makes naming more consistent with libpurple's related structures
+    - Look in to rename functions to better clarify which are Tox-explicit, Purple-explicit, helpers, etc...
+    - Make less liberal use of macro constants, especially where enumeration values could be used
+    - Since the (currently enourmous) callback/options structure initialization is huge, but has been
+        refactored to use field initializers, those fields for functionality not available in tox should be
+        removed entirely, as initializing them to NULL is redundant.
+        Those which tox does support, including those for which functionality is not yet present, should be
+        grouped together and labeled with a meaningfull comment about the functionality.
+        It may also be a good idea to note which file the functionality is implemented in, should it be in
+        a separate file (and it should).
+
+Tox Compatibility
+    - Implement support for avatars (tox has this, all we need to do is hand that over to libpurple)
+    - Implement support for status text (not clear whether this is working or not)
+    - Figure out best practice for handling the IPv6 support flag when calling bootstrap
+    - For now, voice support is likely a pain in the arse. Seeing as it adds another dependency, it may
+        be preferable not to plan on implementing it, even if purple might support voice.
+    - Look in to ToxDNS
+    - Implement support for group chats, and those features that go with them
