@@ -1304,83 +1304,158 @@ static unsigned int toxprpl_send_typing(PurpleConnection* gc, const char* who,
 
 static PurplePluginProtocolInfo prpl_info =
         {
-                .options = OPT_PROTO_NO_PASSWORD | OPT_PROTO_REGISTER_NOSCREENNAME | OPT_PROTO_INVITE_MESSAGE,  /* options */
-                .user_splits = NULL,                               /* user_splits, initialized in toxprpl_init() */
-                .protocol_options = NULL,                               /* protocol_options, initialized in toxprpl_init() */
-                .icon_spec = NO_BUDDY_ICONS,                     /* icon spec */
-                .list_icon = toxprpl_list_icon,                  /* list_icon */
-                .list_emblem = NULL,                               /* list_emblem */
-                .status_text = NULL,                               /* status_text */
-                .tooltip_text = NULL,                               /* tooltip_text */
-                .status_types = toxprpl_status_types,               /* status_types */
-                .blist_node_menu = NULL,                               /* blist_node_menu */
-                .chat_info = NULL,                               /* chat_info */
-                .chat_info_defaults = NULL,                               /* chat_info_defaults */
-                .login = toxprpl_login,                      /* login */
-                .close = toxprpl_close,                      /* close */
-                .send_im = toxprpl_send_im,                    /* send_im */
-                .set_info = NULL,                               /* set_info */
-                .send_typing = toxprpl_send_typing,                /* send_typing */
-                .get_info = NULL,                               /* get_info */
-                .set_status = toxprpl_set_status,                 /* set_status */
-                .set_idle = NULL,                               /* set_idle */
-                .change_passwd = NULL,                               /* change_passwd */
-                .add_buddy = NULL,                               /* add_buddy */
-                .add_buddies = NULL,                               /* add_buddies */
-                .remove_buddy = toxprpl_remove_buddy,               /* remove_buddy */
-                .remove_buddies = NULL,                               /* remove_buddies */
-                .add_permit = NULL,                               /* add_permit */
-                .add_deny = NULL,                               /* add_deny */
-                .rem_permit = NULL,                               /* rem_permit */
-                .rem_deny = NULL,                               /* rem_deny */
-                .set_permit_deny = NULL,                               /* set_permit_deny */
-                .join_chat = NULL,                               /* join_chat */
-                .reject_chat = NULL,                               /* reject_chat */
-                .get_chat_name = NULL,                               /* get_chat_name */
-                .chat_invite = NULL,                               /* chat_invite */
-                .chat_leave = NULL,                               /* chat_leave */
-                .chat_whisper = NULL,                               /* chat_whisper */
-                .chat_send = NULL,                               /* chat_send */
-                .keepalive = NULL,                               /* keepalive */
-                .register_user = NULL,                               /* register_user */
+                // Protocol ------------------------------------------------------------------------------------
 
-                // Deprecated
-                .get_cb_info = NULL,                               /* get_cb_info */
-                .get_cb_away = NULL,                               /* get_cb_away */
+                .options = OPT_PROTO_NO_PASSWORD | OPT_PROTO_REGISTER_NOSCREENNAME | OPT_PROTO_INVITE_MESSAGE,
 
-                .alias_buddy = NULL,                               /* alias_buddy */
-                .group_buddy = NULL,                               /* group_buddy */
-                .rename_group = NULL,                               /* rename_group */
-                .buddy_free = toxprpl_free_buddy,                 /* buddy_free */
-                .convo_closed = NULL,                               /* convo_closed */
-                .normalize = NULL,                               /* normalize */
-                .set_buddy_icon = NULL,                               /* set_buddy_icon */
-                .remove_group = NULL,                               /* remove_group */
-                .get_cb_real_name = NULL,                               /* get_cb_real_name */
-                .set_chat_topic = NULL,                               /* set_chat_topic */
-                .find_blist_chat = NULL,                               /* find_blist_chat */
-                .roomlist_get_list = NULL,                               /* roomlist_get_list */
-                .roomlist_cancel = NULL,                               /* roomlist_cancel */
-                .roomlist_expand_category = NULL,                               /* roomlist_expand_category */
-                .can_receive_file  = toxprpl_can_receive_file,           /* can_receive_file */
-                .send_file = toxprpl_send_file,                  /* send_file */
-                .new_xfer = toxprpl_new_xfer,                   /* new_xfer */
-                .offline_message = toxprpl_offline_message,            /* offline_message */
-                .whiteboard_prpl_ops = NULL,                               /* whiteboard_prpl_ops */
-                .send_raw = NULL,                               /* send_raw */
-                .roomlist_room_serialize = NULL,                               /* roomlist_room_serialize */
-                .unregister_user = NULL,                               /* unregister_user */
-                .send_attention = NULL,                               /* send_attention */
-                .get_attention_types = NULL,                               /* get_attention_types */
-                .struct_size = sizeof(PurplePluginProtocolInfo),   /* struct_size */
-                .get_account_text_table = NULL,                               /* get_account_text_table */
-                .initiate_media = NULL,                               /* initiate_media */
-                .get_media_caps = NULL,                               /* get_media_caps */
-                .get_moods = NULL,                               /* get_moods */
-                .set_public_alias = NULL,                               /* set_public_alias */
-                .get_public_alias = NULL,                               /* get_public_alias */
-                .add_buddy_with_invite = toxprpl_add_buddy,                  /* add_buddy_with_invite */
-                .add_buddies_with_invite = NULL                                /* add_buddies_with_invite */
+                .login = toxprpl_login,
+                .close = toxprpl_close,
+
+                // .user_splits is assigned in toxprpl_init
+                // .protocol_options is assign in toxprpl_init
+
+                // Self ----------------------------------------------------------------------------------------
+
+                .set_status = toxprpl_set_status,
+
+                // Buddy Icons, status -------------------------------------------------------------------------
+
+                /*
+                 *  Right now, this is a null implementation of PurpleBuddyIconSpec
+                 *  For tox support, this will need to describe
+                 *  - format: png
+                 *  - width constraints describing least and worst case image sizes from tox
+                 *  - largest possible filesize that can be returned by tox
+                 *  - scale: preserve ratio
+                 *
+                 *  How this is handled in reality depends on the frontent implementation.
+                 *  Pidgin should be pretty obediant.
+                 */
+                .icon_spec = NO_BUDDY_ICONS,
+
+                /*
+                 * If the icon spec is changed to support protocol icons,
+                 * this `toxpripl_list_icon` should return the name to pass to tox
+                 * in order to get the icon.
+                 * This does not return image data, just a string.
+                 */
+                .list_icon = toxprpl_list_icon,
+
+                /*
+                 * Function which will return a buddy/user's status text
+                 */
+                .status_text = NULL,
+
+                /*
+                 * Possible states for any user
+                 */
+                .status_types = toxprpl_status_types,
+
+                /*
+                 * Buddy tooltip.
+                 * Perhaps the Tox id could go here, for quick reference
+                 */
+                .tooltip_text = NULL,
+
+                /*
+                 * Buddy menu additions,
+                 * perhaps a `copy id` function could go here
+                 */
+                .blist_node_menu = NULL,
+
+                // Buddy Management ----------------------------------------------------------------------------
+
+                /*
+                 * Replace add_buddy, add_buddies respectively
+                 * Whether plural add should be implemented depends on further reading of the documentation
+                 */
+                .add_buddy_with_invite = toxprpl_add_buddy,
+                .add_buddies_with_invite = NULL,
+
+                .remove_buddy = toxprpl_remove_buddy,
+                .remove_buddies = NULL,
+
+                /*
+                 * Blocking methods.
+                 * No significant documentation is available, but names lend themselves to being understood.
+                 */
+                .add_permit = NULL,
+                .add_deny = NULL,
+                .rem_permit = NULL,
+                .rem_deny = NULL,
+                .set_permit_deny = NULL,
+
+                // All Chats -----------------------------------------------------------------------------------
+
+                .send_im = toxprpl_send_im,
+                .send_typing = toxprpl_send_typing,
+                .offline_message = toxprpl_offline_message,
+
+                // Group Chats ---------------------------------------------------------------------------------
+
+                /*
+                 * Called when the frontend wants to join a chat
+                 * Parameter components is as `chat_info` unless the user has accepted an invite,
+                 * in which case it is as in `serv_got_chat_invite`
+                 */
+                .join_chat = NULL,
+
+                /*
+                 * Returns a list of chats in which the user is enrolled
+                 */
+                .chat_info = NULL,
+
+                /*
+                 * Returns a map representing default chat options
+                 */
+                .chat_info_defaults = NULL,
+
+                /*
+                 * Called when the frontend rejects a chat invite
+                 */
+                .reject_chat = NULL,
+
+                /*
+                 * Get the display name of a chat from the internal representation
+                 */
+                .get_chat_name = NULL,
+
+                /*
+                 * Invite a user, `who`, to join chat `id`, with message `message`
+                 */
+                .chat_invite = NULL,
+
+                /*
+                 * Leave chat `id`
+                 */
+                .chat_leave = NULL,
+
+                /*
+                 * Send a message in a chat, `id`.
+                 */
+                .chat_send = NULL,
+
+                /*
+                 * Set a group title
+                 */
+                .set_chat_topic = NULL,
+
+                // File transfers ------------------------------------------------------------------------------
+                // These and related functions are defined in ``impl/xfers.c''
+
+                .can_receive_file   = toxprpl_can_receive_file,
+                .send_file          = toxprpl_send_file,
+                .new_xfer           = toxprpl_new_xfer,
+
+                // ToxAV ---------------------------------------------------------------------------------------
+
+                .initiate_media = NULL,
+                .get_media_caps = NULL,
+
+                // API -----------------------------------------------------------------------------------------
+
+                .buddy_free = toxprpl_free_buddy,
+                .struct_size = sizeof(PurplePluginProtocolInfo),
         };
 
 static void toxprpl_init(PurplePlugin* plugin) {
