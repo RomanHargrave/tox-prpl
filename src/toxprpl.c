@@ -90,32 +90,31 @@ static void toxprpl_set_status(PurpleAccount* account, PurpleStatus* status);
 // Start of file transfer functions ------------------------------------------------------------------------------------
 
 /*
- * File transfer logic
+ * File transfer callbacks
  * Implementation resides in `impl/xfers.c`
  */
-PurpleXfer* toxprpl_find_xfer(PurpleConnection*, int, uint8_t);
+
+/*
+ * Tox file transfer callbacks
+ * - on_file_control
+ * - on_file_end_request
+ * - on_file_data
+ */
 void on_file_control(Tox*, int32_t, uint8_t, uint8_t, uint8_t, const uint8_t*, uint16_t, void*);
 void on_file_send_request(Tox*, int32_t, uint8_t, uint64_t, const uint8_t*, uint16_t, void*);
 void on_file_data(Tox*, int32_t, uint8_t, const uint8_t*, uint16_t, void*);
 
+/*
+ * LibPurple file transfer backend
+ * - toxprpl_can_receive_file
+ * - toxprpl_send_file
+ * - toxprpl_new_xfer
+ */
 gboolean toxprpl_can_receive_file(PurpleConnection*, const char*);
-gboolean toxprpl_xfer_idle_write(toxprpl_idle_write_data*);
-void toxprpl_xfer_start(PurpleXfer*);
-void toxprpl_xfer_init(PurpleXfer*);
-gssize toxprpl_xfer_write(const guchar*, size_t, PurpleXfer*);
-gssize toxprpl_xfer_read(guchar**, PurpleXfer*);
-void toxprpl_xfer_free(PurpleXfer*);
-void toxprpl_xfer_cancel_send(PurpleXfer*);
-void toxprpl_xfer_cancel_recv(PurpleXfer*);
-void toxprpl_xfer_request_denied(PurpleXfer*);
-void toxprpl_xfer_end(PurpleXfer*);
-PurpleXfer* toxprpl_new_xfer(PurpleConnection*, const gchar*);
-PurpleXfer* toxprpl_new_xfer_receive(PurpleConnection*, const char*, int, int, const goffset, const char*);
 void toxprpl_send_file(PurpleConnection*, const char*, const char*);
+PurpleXfer* toxprpl_new_xfer(PurpleConnection*, const gchar*);
 
 // End of file transfer functions --------------------------------------------------------------------------------------
-
-// returned buffer must be freed by the caller
 
 /* tox specific stuff */
 static void on_connectionstatus(Tox* tox, int32_t fnum, uint8_t status,
