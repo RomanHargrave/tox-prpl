@@ -15,7 +15,10 @@
 
 // Account Overall ----------------------------------------------------------------------------
 
-void toxprpl_user_import(PurpleAccount* acct, const char* filename) {
+/*
+ * Import a Tox account from `filename` into Purple account `acct`
+ */
+void ToxPRPL_importUser(PurpleAccount* acct, const char* filename) {
     purple_debug_info("toxprpl", "import user account: %s\n", filename);
 
     PurpleConnection* gc = purple_account_get_connection(acct);
@@ -84,7 +87,10 @@ void toxprpl_user_import(PurpleAccount* acct, const char* filename) {
     close(fd);
 }
 
-void toxprpl_user_export(PurpleConnection* gc, const char* filename) {
+/*
+ * Export a Tox account to `filename`
+ */
+void ToxPRPL_exportUser(PurpleConnection* gc, const char* filename) {
     purple_debug_info("toxprpl", "export account to %s\n", filename);
 
     toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
@@ -137,7 +143,8 @@ void toxprpl_user_export(PurpleConnection* gc, const char* filename) {
     }
 }
 
-gboolean toxprpl_save_account(PurpleAccount* account, Tox* tox) {
+// TODO common/accounts?
+gboolean ToxPRPL_saveAccount(PurpleAccount* account, Tox* tox) {
     uint32_t msg_size = tox_size(tox);
     if (msg_size > 0) {
         guchar* msg_data = g_malloc0(msg_size);
@@ -157,7 +164,7 @@ gboolean toxprpl_save_account(PurpleAccount* account, Tox* tox) {
 /*
  * Purple callback for the nickname settings dialog
  */
-void toxprpl_set_nick_action(PurpleConnection* gc, const char* nickname) {
+void ToxPRPL_Purple_onSetNickname(PurpleConnection* gc, const char* nickname) {
     PurpleAccount* account = purple_connection_get_account(gc);
     toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
     if (nickname != NULL) {
@@ -172,7 +179,7 @@ void toxprpl_set_nick_action(PurpleConnection* gc, const char* nickname) {
 /*
  * LibPurple callback that is invoked when the frontend wants to set the user status
  */
-void toxprpl_set_status(PurpleAccount* account, PurpleStatus* status) {
+void ToxPRPL_Purple_onSetStatus(PurpleAccount* account, PurpleStatus* status) {
     const char* status_id = purple_status_get_id(status);
     const char* message = purple_status_get_attr_string(status, "message");
 
@@ -197,7 +204,7 @@ void toxprpl_set_status(PurpleAccount* account, PurpleStatus* status) {
 
 // Frontend Glue ---------------------------------
 
-void toxprpl_action_show_id_dialog(PurplePluginAction* action) {
+void ToxPRPL_showIDNumberDialog(PurplePluginAction* action) {
     PurpleConnection* gc = (PurpleConnection*) action->context;
 
     toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
@@ -215,7 +222,7 @@ void toxprpl_action_show_id_dialog(PurplePluginAction* action) {
                           id);
 }
 
-void toxprpl_action_set_nick_dialog(PurplePluginAction* action) {
+void ToxPRPL_showSitNicknameDialog(PurplePluginAction* action) {
     PurpleConnection* gc = (PurpleConnection*) action->context;
     PurpleAccount* account = purple_connection_get_account(gc);
 
@@ -224,13 +231,13 @@ void toxprpl_action_set_nick_dialog(PurplePluginAction* action) {
                          NULL,
                          purple_account_get_string(account, "nickname", ""),
                          FALSE, FALSE, NULL,
-                         _("_Set"), G_CALLBACK(toxprpl_set_nick_action),
+                         _("_Set"), G_CALLBACK(ToxPRPL_Purple_onSetNickname),
                          _("_Cancel"), NULL,
                          account, account->username, NULL,
                          gc);
 }
 
-void toxprpl_export_account_dialog(PurplePluginAction* action) {
+void ToxPRPL_showExportDialog(PurplePluginAction* action) {
     purple_debug_info("toxprpl", "ask to export account\n");
 
     PurpleConnection* gc = (PurpleConnection*) action->context;
@@ -250,7 +257,7 @@ void toxprpl_export_account_dialog(PurplePluginAction* action) {
                         _("Export existing Tox account data"),
                         id,
                         TRUE,
-                        G_CALLBACK(toxprpl_user_export),
+                        G_CALLBACK(ToxPRPL_exportUser),
                         NULL,
                         account,
                         NULL,
@@ -263,25 +270,25 @@ void toxprpl_export_account_dialog(PurplePluginAction* action) {
  * Returns a list of things that can be done with the account used by LibPurple
  * Sets up callbacks to
  * - toxprpl_acion_show_id_dialog
- * - toxprpl_action_set_nick_dialog
- * - toxprpl_export_account_dialog
+ * - ToxPRPL_showSitNicknameDialog
+ * - ToxPRPL_showExportDialog
  */
-GList* toxprpl_account_actions(PurplePlugin* plugin, gpointer context) {
+GList* ToxPRPL_Purple_getAccountActions(PurplePlugin* plugin, gpointer context) {
     purple_debug_info("toxprpl", "setting up account actions\n");
 
     GList* actions = NULL;
     PurplePluginAction* action;
 
     action = purple_plugin_action_new(_("Show my id..."),
-                                      toxprpl_action_show_id_dialog);
+                                      ToxPRPL_showIDNumberDialog);
     actions = g_list_append(actions, action);
 
     action = purple_plugin_action_new(_("Set nickname..."),
-                                      toxprpl_action_set_nick_dialog);
+                                      ToxPRPL_showSitNicknameDialog);
     actions = g_list_append(actions, action);
 
     action = purple_plugin_action_new(_("Export account data..."),
-                                      toxprpl_export_account_dialog);
+                                      ToxPRPL_showExportDialog);
     actions = g_list_append(actions, action);
     return actions;
 }

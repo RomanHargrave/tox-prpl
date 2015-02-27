@@ -152,13 +152,13 @@ gboolean tox_connection_check(gpointer gc) {
             }
         }
         else {
-            toxprpl_set_nick_action(gc, nick);
+            ToxPRPL_Purple_onSetNickname(gc, nick);
         }
 
         PurpleStatus* status = purple_account_get_active_status(account);
         if (status != NULL) {
             purple_debug_info("toxprpl", "(re)setting status\n");
-            toxprpl_set_status(account, status);
+            ToxPRPL_Purple_onSetStatus(account, status);
         }
     }
     else if ((plugin->connected == 1) && !tox_isconnected(plugin->tox)) {
@@ -319,7 +319,7 @@ static void toxprpl_user_ask_import(PurpleAccount* acct) {
                         _("Import existing Tox account data"),
                         NULL,
                         FALSE,
-                        G_CALLBACK(toxprpl_user_import),
+                        G_CALLBACK(ToxPRPL_importUser),
                         G_CALLBACK(toxprpl_login),
                         acct,
                         NULL,
@@ -382,7 +382,7 @@ void toxprpl_login_after_setup(PurpleAccount* acct) {
     }
     else // write account into pidgin
     {
-        toxprpl_save_account(acct, tox);
+        ToxPRPL_saveAccount(acct, tox);
     }
 
     purple_connection_update_progress(gc, _("Connecting"),
@@ -455,7 +455,7 @@ void toxprpl_login_after_setup(PurpleAccount* acct) {
     }
 
     purple_connection_set_protocol_data(gc, plugin);
-    toxprpl_set_nick_action(gc, nick);
+    ToxPRPL_Purple_onSetNickname(gc, nick);
 }
 
 /*
@@ -524,7 +524,7 @@ void toxprpl_close(PurpleConnection* gc) {
     purple_cmd_unregister(plugin->myid_command_id);
     purple_cmd_unregister(plugin->nick_command_id);
 
-    if (!toxprpl_save_account(account, plugin->tox)) {
+    if (!ToxPRPL_saveAccount(account, plugin->tox)) {
         purple_account_set_string(account, "messenger", "");
     }
 
@@ -564,7 +564,7 @@ static PurplePluginProtocolInfo prpl_info = {
         /*
          * set_status lives inside ``purple/account.c''
          */
-        .set_status = toxprpl_set_status,
+        .set_status = ToxPRPL_Purple_onSetStatus,
 
         // Buddy Icons, status -----------------------------------------------------------------------------------------
 
@@ -731,7 +731,7 @@ static PurplePluginInfo info = {
         .homepage = PACKAGE_URL,
 
         .extra_info = &prpl_info,
-        .actions = toxprpl_account_actions,
+        .actions = ToxPRPL_Purple_getAccountActions,
 };
 
 static void toxprpl_init(PurplePlugin* plugin) {

@@ -6,13 +6,13 @@
  * Defined in ``purple/account.c''
  */
 
-void toxprpl_user_export(PurpleConnection*, const char*);
-void toxprpl_user_import(PurpleAccount*, const char*);
-void toxprpl_export_account_dialog(PurplePluginAction*);
-gboolean toxprpl_save_account(PurpleAccount* account, Tox* tox);
-void toxprpl_action_show_id_dialog(PurplePluginAction*);
-void toxprpl_action_set_nick_dialog(PurplePluginAction*);
-GList* toxprpl_account_actions(PurplePlugin*, gpointer);
-void toxprpl_set_nick_action(PurpleConnection*, const char*);
-void toxprpl_set_status(PurpleAccount*, PurpleStatus*);
+void ToxPRPL_exportUser(PurpleConnection*, const char*);
+void ToxPRPL_importUser(PurpleAccount*, const char*);
+void ToxPRPL_showExportDialog(PurplePluginAction*);
+gboolean ToxPRPL_saveAccount(PurpleAccount* account, Tox* tox);
+void ToxPRPL_showIDNumberDialog(PurplePluginAction*);
+void ToxPRPL_showSitNicknameDialog(PurplePluginAction*);
+GList* ToxPRPL_Purple_getAccountActions(PurplePlugin*, gpointer);
+void ToxPRPL_Purple_onSetNickname(PurpleConnection*, const char*);
+void ToxPRPL_Purple_onSetStatus(PurpleAccount*, PurpleStatus*);
 
