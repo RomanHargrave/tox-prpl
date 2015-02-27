@@ -16,8 +16,8 @@
 * errno values, or just big something.  If the message should
 * not be echoed to the conversation window, return 0.
 */
-int toxprpl_send_im(PurpleConnection* gc, const char* who,
-                    const char* message, PurpleMessageFlags flags) {
+int ToxPRPL_Purple_sendUserMessage(PurpleConnection* gc, const char* who, const char* message,
+                                   PurpleMessageFlags flags) {
     const char* from_username = gc->account->username;
 
     purple_debug_info("toxprpl", "sending message from %s to %s\n",
@@ -61,8 +61,7 @@ int toxprpl_send_im(PurpleConnection* gc, const char* who,
 /*
  * LibPurple typing callback
  */
-unsigned int toxprpl_send_typing(PurpleConnection* gc, const char* who,
-                                 PurpleTypingState state) {
+unsigned int ToxPRPL_Purple_updateTypingState(PurpleConnection* gc, const char* who, PurpleTypingState state) {
     purple_debug_info("toxprpl", "send_typing\n");
 
     toxprpl_return_val_if_fail(gc != NULL, 0);

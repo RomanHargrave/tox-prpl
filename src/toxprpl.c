@@ -53,9 +53,9 @@ void toxprpl_login(PurpleAccount* acct);
  * In file ``purple/chat.c''
  */
 
-int toxprpl_send_im(PurpleConnection*, const char*, const char*, PurpleMessageFlags);
+int ToxPRPL_Purple_sendUserMessage(PurpleConnection*, const char*, const char*, PurpleMessageFlags);
 
-unsigned int toxprpl_send_typing(PurpleConnection*, const char*, PurpleTypingState);
+unsigned int ToxPRPL_Purple_updateTypingState(PurpleConnection*, const char*, PurpleTypingState);
 
 // end prpl chat functions --------------------------------------------
 
@@ -643,8 +643,8 @@ static PurplePluginProtocolInfo prpl_info = {
          * These functions may be found in ``purple/chat.c''
          */
 
-        .send_im = toxprpl_send_im,
-        .send_typing = toxprpl_send_typing,
+        .send_im = ToxPRPL_Purple_sendUserMessage,
+        .send_typing = ToxPRPL_Purple_updateTypingState,
         .offline_message = NULL,
 
         // Group Chats -------------------------------------------------------------------------------------------------
