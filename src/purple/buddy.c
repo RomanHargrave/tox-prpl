@@ -202,4 +202,10 @@ void toxprpl_add_to_buddylist(toxprpl_accept_friend_data* data) {
     g_free(data);
 }
 
-
+/*
+ * TODO Buddy icons
+ * Implementation for buddy icons should just return the name of  the buddy in terms of tox
+ */
+const char* toxprpl_list_icon(PurpleAccount* acct, PurpleBuddy* buddy) {
+    return "tox";
+}

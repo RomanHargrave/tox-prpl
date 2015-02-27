@@ -304,6 +304,7 @@ void toxprpl_query_buddy_info(gpointer, gpointer);
 void toxprpl_remove_buddy(PurpleConnection* gc, PurpleBuddy* buddy, PurpleGroup* group);
 void toxprpl_add_buddy(PurpleConnection*, PurpleBuddy*, PurpleGroup*, const char*);
 void toxprpl_add_to_buddylist(toxprpl_accept_friend_data*);
+const char* toxprpl_list_icon(PurpleAccount*, PurpleBuddy*);
 
 // End buddy backend ----------------------------------------
 
@@ -385,14 +386,6 @@ gboolean tox_connection_check(gpointer gc) {
     return TRUE;
 }
 
-
-/*
- * TODO Buddy icons
- * Implementation for buddy icons should just return the name of  the buddy in terms of tox
- */
-static const char* toxprpl_list_icon(PurpleAccount* acct, PurpleBuddy* buddy) {
-    return "tox";
-}
 
 /*
  * Returns potential status types
