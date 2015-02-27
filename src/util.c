@@ -63,7 +63,7 @@ unsigned char* ToxPRPL_hexStringToBin(const char* s) {
 // End Base Conversion -------------------------------------------------------------------------------------------------
 
 // Tox status type abstraction -----------------------------------------------------------------------------------------
-const toxprpl_status ToxPRPL_ToxStatuses[] = {
+const ToxPRPL_Status ToxPRPL_ToxStatuses[] = {
         {
                 PURPLE_STATUS_AVAILABLE, TOXPRPL_STATUS_ONLINE,
                 "tox_online", _("Online")

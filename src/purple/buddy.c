@@ -1,7 +1,6 @@
 #include <toxprpl.h>
 #include <toxprpl/account.h>
 #include <string.h>
-#include <toxprpl_data.h>
 
 /*
  * LibPurple friend add callback.
@@ -76,13 +75,13 @@ void ToxPRPL_Purple_getBuddyInfo(gpointer data, gpointer user_data) {
     purple_debug_info("toxprpl", "ToxPRPL_Purple_getBuddyInfo\n");
     PurpleBuddy* buddy = (PurpleBuddy*) data;
     PurpleConnection* gc = (PurpleConnection*) user_data;
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
+    ToxPRPL_PluginData* plugin = purple_connection_get_protocol_data(gc);
 
-    toxprpl_buddy_data* buddy_data = purple_buddy_get_protocol_data(buddy);
+    ToxPRPL_BuddyData* buddy_data = purple_buddy_get_protocol_data(buddy);
     if (buddy_data == NULL) {
         unsigned char* bin_key = ToxPRPL_hexStringToBin(buddy->name);
         int fnum = tox_get_friend_number(plugin->tox, bin_key);
-        buddy_data = g_new0(toxprpl_buddy_data, 1);
+        buddy_data = g_new0(ToxPRPL_BuddyData, 1);
         buddy_data->tox_friendlist_number = fnum;
         purple_buddy_set_protocol_data(buddy, buddy_data);
         g_free(bin_key);
@@ -105,8 +104,8 @@ void ToxPRPL_Purple_getBuddyInfo(gpointer data, gpointer user_data) {
 
 void ToxPRPL_Purple_removeBuddy(PurpleConnection* gc, PurpleBuddy* buddy, PurpleGroup* group) {
     purple_debug_info("toxprpl", "removing buddy %s\n", buddy->name);
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
-    toxprpl_buddy_data* buddy_data = purple_buddy_get_protocol_data(buddy);
+    ToxPRPL_PluginData* plugin = purple_connection_get_protocol_data(gc);
+    ToxPRPL_BuddyData* buddy_data = purple_buddy_get_protocol_data(buddy);
     if (buddy_data != NULL) {
         purple_debug_info("toxprpl", "removing tox friend #%d\n",
                           buddy_data->tox_friendlist_number);
@@ -130,7 +129,7 @@ void ToxPRPL_Purple_addBuddy(PurpleConnection* gc, PurpleBuddy* buddy, PurpleGro
         return;
     }
 
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
+    ToxPRPL_PluginData* plugin = purple_connection_get_protocol_data(gc);
     int ret = ToxPRPL_Purple_addFriend(plugin->tox, gc, buddy->name, TRUE, msg);
     if (ret < 0) {
         purple_debug_info("toxprpl", "adding buddy %s failed (%d)\n",

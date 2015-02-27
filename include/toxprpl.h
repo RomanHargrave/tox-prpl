@@ -79,7 +79,7 @@
 
 // util.c start --------------------------------------------------------------------------------------------------------
 
-extern const toxprpl_status ToxPRPL_ToxStatuses[];
+extern const ToxPRPL_Status ToxPRPL_ToxStatuses[];
 
 /*
  * Kitchen sink

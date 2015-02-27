@@ -93,7 +93,7 @@ void ToxPRPL_importUser(PurpleAccount* acct, const char* filename) {
 void ToxPRPL_exportUser(PurpleConnection* gc, const char* filename) {
     purple_debug_info("toxprpl", "export account to %s\n", filename);
 
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
+    ToxPRPL_PluginData* plugin = purple_connection_get_protocol_data(gc);
 
     // When is this a problem?
     //  and why is there no debug statement?
@@ -166,7 +166,7 @@ gboolean ToxPRPL_saveAccount(PurpleAccount* account, Tox* tox) {
  */
 void ToxPRPL_Purple_onSetNickname(PurpleConnection* gc, const char* nickname) {
     PurpleAccount* account = purple_connection_get_account(gc);
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
+    ToxPRPL_PluginData* plugin = purple_connection_get_protocol_data(gc);
     if (nickname != NULL) {
         purple_connection_set_display_name(gc, nickname);
         tox_set_name(plugin->tox, (uint8_t*) nickname, (uint16_t) (strlen(nickname) + 1));
@@ -184,7 +184,7 @@ void ToxPRPL_Purple_onSetStatus(PurpleAccount* account, PurpleStatus* status) {
     const char* message = purple_status_get_attr_string(status, "message");
 
     PurpleConnection* gc = purple_account_get_connection(account);
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
+    ToxPRPL_PluginData* plugin = purple_connection_get_protocol_data(gc);
 
     purple_debug_info("toxprpl", "setting status %s\n", status_id);
 
@@ -207,7 +207,7 @@ void ToxPRPL_Purple_onSetStatus(PurpleAccount* account, PurpleStatus* status) {
 void ToxPRPL_showIDNumberDialog(PurplePluginAction* action) {
     PurpleConnection* gc = (PurpleConnection*) action->context;
 
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
+    ToxPRPL_PluginData* plugin = purple_connection_get_protocol_data(gc);
 
     uint8_t bin_id[TOX_FRIEND_ADDRESS_SIZE];
     tox_get_address(plugin->tox, bin_id);
@@ -242,7 +242,7 @@ void ToxPRPL_showExportDialog(PurplePluginAction* action) {
 
     PurpleConnection* gc = (PurpleConnection*) action->context;
     PurpleAccount* account = purple_connection_get_account(gc);
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
+    ToxPRPL_PluginData* plugin = purple_connection_get_protocol_data(gc);
 
     // When is this a problem?
     //  and why is there no debug statement?

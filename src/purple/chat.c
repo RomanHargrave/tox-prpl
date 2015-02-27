@@ -31,12 +31,12 @@ int ToxPRPL_Purple_sendUserMessage(PurpleConnection* gc, const char* who, const 
         purple_debug_info("toxprpl", "Can't send message because buddy %s was not found\n", who);
         return message_sent;
     }
-    toxprpl_buddy_data* buddy_data = purple_buddy_get_protocol_data(buddy);
+    ToxPRPL_BuddyData* buddy_data = purple_buddy_get_protocol_data(buddy);
     if (buddy_data == NULL) {
         purple_debug_info("toxprpl", "Can't send message because tox friend number is unknown\n");
         return message_sent;
     }
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
+    ToxPRPL_PluginData* plugin = purple_connection_get_protocol_data(gc);
     char* no_html = purple_markup_strip_html(message);
 
     if (purple_message_meify(no_html, -1)) {
@@ -67,7 +67,7 @@ unsigned int ToxPRPL_Purple_updateTypingState(PurpleConnection* gc, const char* 
     toxprpl_return_val_if_fail(gc != NULL, 0);
     toxprpl_return_val_if_fail(who != NULL, 0);
 
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
+    ToxPRPL_PluginData* plugin = purple_connection_get_protocol_data(gc);
     toxprpl_return_val_if_fail(plugin != NULL && plugin->tox != NULL, 0);
 
     PurpleAccount* account = purple_connection_get_account(gc);
@@ -76,7 +76,7 @@ unsigned int ToxPRPL_Purple_updateTypingState(PurpleConnection* gc, const char* 
     PurpleBuddy* buddy = purple_find_buddy(account, who);
     toxprpl_return_val_if_fail(buddy != NULL, 0);
 
-    toxprpl_buddy_data* buddy_data = purple_buddy_get_protocol_data(buddy);
+    ToxPRPL_BuddyData* buddy_data = purple_buddy_get_protocol_data(buddy);
     toxprpl_return_val_if_fail(buddy_data != NULL, 0);
 
     switch (state) {

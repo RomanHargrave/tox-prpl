@@ -108,7 +108,7 @@ void ToxPRPL_Tox_onUserTypingChange(Tox*, int32_t, uint8_t, void*);
  */
 static gboolean ToxPRPL_updateConnectionState(gpointer data) {
     PurpleConnection* gc = (PurpleConnection*) data;
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
+    ToxPRPL_PluginData* plugin = purple_connection_get_protocol_data(gc);
     if ((plugin != NULL) && (plugin->tox != NULL)) {
         tox_do(plugin->tox);
     }
@@ -122,7 +122,7 @@ static gboolean ToxPRPL_updateConnectionState(gpointer data) {
  * and data for each buddy will be freshened
  */
 gboolean ToxPRPL_updateClientStatus(gpointer gc) {
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
+    ToxPRPL_PluginData* plugin = purple_connection_get_protocol_data(gc);
 
     if ((plugin->connected == 0) && tox_isconnected(plugin->tox)) {
         plugin->connected = 1;
@@ -232,7 +232,7 @@ static void ToxPRPL_synchronizeBuddy(PurpleAccount* account, Tox* tox, int frien
         buddy = purple_buddy_new(account, buddy_key, NULL);
     }
 
-    toxprpl_buddy_data* buddy_data = g_new0(toxprpl_buddy_data, 1);
+    ToxPRPL_BuddyData* buddy_data = g_new0(ToxPRPL_BuddyData, 1);
     buddy_data->tox_friendlist_number = friend_number;
     purple_buddy_set_protocol_data(buddy, buddy_data);
     purple_blist_add_buddy(buddy, NULL, NULL, NULL);
@@ -269,8 +269,7 @@ static void ToxPRPL_synchronizeBuddyList(PurpleAccount* acct, Tox* tox) {
                 while (iterator != NULL) {
                     PurpleBuddy* buddy = iterator->data;
                     if (strcmp(buddy->name, str_id) == 0) {
-                        toxprpl_buddy_data* buddy_data =
-                                g_new0(toxprpl_buddy_data, 1);
+                        ToxPRPL_BuddyData* buddy_data = g_new0(ToxPRPL_BuddyData, 1);
                         buddy_data->tox_friendlist_number = fnum;
                         purple_buddy_set_protocol_data(buddy, buddy_data);
                         friendlist[i] = -1;
@@ -286,7 +285,7 @@ static void ToxPRPL_synchronizeBuddyList(PurpleAccount* acct, Tox* tox) {
         // removed
         while (iterator != NULL) {
             PurpleBuddy* buddy = iterator->data;
-            toxprpl_buddy_data* buddy_data =
+            ToxPRPL_BuddyData* buddy_data =
                     purple_buddy_get_protocol_data(buddy);
             if (buddy_data == NULL) {
                 purple_blist_remove_buddy(buddy);
@@ -341,10 +340,8 @@ void ToxPRPL_configureToxAndConnect(PurpleAccount* acct) {
 
     Tox* tox = tox_new(0);
     if (tox == NULL) {
-        purple_debug_info("toxprpl", "Fatal error, could not allocate memory "
-                "for messenger!\n");
+        purple_debug_info("toxprpl", "Fatal error, could not allocate memory for messenger!\n");
         return;
-
     }
 
     tox_callback_connection_status(tox, ToxPRPL_Tox_onUserConnectionStatusChange, gc);
@@ -396,30 +393,25 @@ void ToxPRPL_configureToxAndConnect(PurpleAccount* acct) {
                                                 DEFAULT_SERVER_KEY);
     /// \todo add limits check to make sure the user did not enter something
     /// invalid
-    uint16_t port = (uint16_t) purple_account_get_int(acct, "dht_server_port",
-                                                      DEFAULT_SERVER_PORT);
+    uint16_t port = (uint16_t) purple_account_get_int(acct, "dht_server_port", DEFAULT_SERVER_PORT);
 
-    const char* ip = purple_account_get_string(acct, "dht_server",
-                                               DEFAULT_SERVER_IP);
+    const char* ip = purple_account_get_string(acct, "dht_server", DEFAULT_SERVER_IP);
 
-    unsigned char* bin_str = ToxPRPL_hexStringToBin(key);
+    unsigned char* publicKey = ToxPRPL_hexStringToBin(key);
 
-    purple_debug_info("toxprpl", "Will connect to %s:%d (%s)\n",
-                      ip, port, key);
+    purple_debug_info("toxprpl", "Will connect to %s:%d (%s)\n", ip, port, key);
 
-    if (tox_bootstrap_from_address(tox, ip, TOXPRPL_USE_IPV6, htons(port), bin_str) == 0) {
-        purple_connection_error_reason(gc,
-                                       PURPLE_CONNECTION_ERROR_NETWORK_ERROR,
-                                       _("server invalid or not found"));
-        g_free(bin_str);
+    if (tox_bootstrap_from_address(tox, ip, TOXPRPL_USE_IPV6, port, publicKey) == 0) {
+        purple_connection_error_reason(gc, PURPLE_CONNECTION_ERROR_NETWORK_ERROR, _("server invalid or not found"));
+        g_free(publicKey);
         tox_kill(tox);
         return;
     }
-    g_free(bin_str);
+    g_free(publicKey);
 
     ToxPRPL_synchronizeBuddyList(acct, tox);
 
-    toxprpl_plugin_data* plugin = g_new0(toxprpl_plugin_data, 1);
+    ToxPRPL_PluginData* plugin = g_new0(ToxPRPL_PluginData, 1);
 
     plugin->tox = tox;
     plugin->tox_timer = purple_timeout_add(80, ToxPRPL_updateConnectionState, gc);
@@ -507,7 +499,7 @@ void ToxPRPL_shutdownPRPL(PurpleConnection* gc) {
     purple_debug_info("toxprpl", "Closing!\n");
 
     PurpleAccount* account = purple_connection_get_account(gc);
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
+    ToxPRPL_PluginData* plugin = purple_connection_get_protocol_data(gc);
     if (plugin == NULL) {
         return;
     }
@@ -543,7 +535,7 @@ void ToxPRPL_shutdownPRPL(PurpleConnection* gc) {
  */
 static void ToxPRPL_destroyBuddy(PurpleBuddy* buddy) {
     if (buddy->proto_data) {
-        toxprpl_buddy_data* buddy_data = buddy->proto_data;
+        ToxPRPL_BuddyData* buddy_data = buddy->proto_data;
         g_free(buddy_data);
     }
 }

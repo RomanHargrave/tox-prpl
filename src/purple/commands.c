@@ -12,7 +12,7 @@
 PurpleCmdRet ToxPRPL_Command_myId(PurpleConversation* conv, const gchar* cmd, gchar** args, gchar** error, void* data) {
     purple_debug_info("toxprpl", "/myid command detected\n");
     PurpleConnection* gc = (PurpleConnection*) data;
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
+    ToxPRPL_PluginData* plugin = purple_connection_get_protocol_data(gc);
 
     uint8_t bin_id[TOX_FRIEND_ADDRESS_SIZE];
     tox_get_address(plugin->tox, bin_id);

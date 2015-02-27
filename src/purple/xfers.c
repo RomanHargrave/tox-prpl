@@ -7,7 +7,7 @@ void ToxPRPL_Purple_prepareXfer(PurpleXfer* xfer) {
     purple_debug_info("toxprpl", "xfer_init\n");
     toxprpl_return_if_fail(xfer != NULL);
 
-    toxprpl_xfer_data* xfer_data = xfer->data;
+    ToxPRPL_XferData* xfer_data = xfer->data;
     toxprpl_return_if_fail(xfer_data != NULL);
 
     if (purple_xfer_get_type(xfer) == PURPLE_XFER_SEND) {
@@ -17,7 +17,7 @@ void ToxPRPL_Purple_prepareXfer(PurpleXfer* xfer) {
         PurpleConnection* gc = purple_account_get_connection(account);
         toxprpl_return_if_fail(gc != NULL);
 
-        toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
+        ToxPRPL_PluginData* plugin = purple_connection_get_protocol_data(gc);
         toxprpl_return_if_fail(plugin != NULL && plugin->tox != NULL);
 
         const char* who = purple_xfer_get_remote_user(xfer);
@@ -26,7 +26,7 @@ void ToxPRPL_Purple_prepareXfer(PurpleXfer* xfer) {
         PurpleBuddy* buddy = purple_find_buddy(account, who);
         toxprpl_return_if_fail(buddy != NULL);
 
-        toxprpl_buddy_data* buddy_data = purple_buddy_get_protocol_data(buddy);
+        ToxPRPL_BuddyData* buddy_data = purple_buddy_get_protocol_data(buddy);
         toxprpl_return_if_fail(buddy_data != NULL);
 
         int friendnumber = buddy_data->tox_friendlist_number;
@@ -51,7 +51,7 @@ void ToxPRPL_Purple_prepareXfer(PurpleXfer* xfer) {
 }
 
 
-gboolean ToxPRPL_writeIdleData(IdleWriteData* data) {
+gboolean ToxPRPL_writeIdleData(ToxPRPL_IdleWriteData* data) {
     toxprpl_return_val_if_fail(data != NULL, FALSE);
     // If running is false the transfer was stopped and data->xfer
     // may have been deleted already
@@ -82,7 +82,7 @@ void ToxPRPL_Purple_startXfer(PurpleXfer* xfer) {
     toxprpl_return_if_fail(xfer != NULL);
     toxprpl_return_if_fail(xfer->data != NULL);
 
-    toxprpl_xfer_data* xfer_data = xfer->data;
+    ToxPRPL_XferData* xfer_data = xfer->data;
 
     if (purple_xfer_get_type(xfer) == PURPLE_XFER_SEND) {
         //copy whole file into memory
@@ -98,7 +98,7 @@ void ToxPRPL_Purple_startXfer(PurpleXfer* xfer) {
             return;
         }
 
-        IdleWriteData* data = g_new0(IdleWriteData, 1);
+        ToxPRPL_IdleWriteData* data = g_new0(ToxPRPL_IdleWriteData, 1);
         if (data == NULL) {
             purple_debug_warning("toxprpl", "data == NULL");
             g_free(buffer);
@@ -122,7 +122,7 @@ gssize ToxPRPL_Purple_writeXfer(const guchar* data, size_t len, PurpleXfer* xfer
     toxprpl_return_val_if_fail(data != NULL, -1);
     toxprpl_return_val_if_fail(len > 0, -1);
     toxprpl_return_val_if_fail(xfer != NULL, -1);
-    toxprpl_xfer_data* xfer_data = xfer->data;
+    ToxPRPL_XferData* xfer_data = xfer->data;
     toxprpl_return_val_if_fail(xfer_data != NULL, -1);
 
     toxprpl_return_val_if_fail(purple_xfer_get_type(xfer) == PURPLE_XFER_SEND, -1);
@@ -156,10 +156,10 @@ void ToxPRPL_freeXfer(PurpleXfer* xfer) {
     toxprpl_return_if_fail(xfer != NULL);
     toxprpl_return_if_fail(xfer->data != NULL);
 
-    toxprpl_xfer_data* xfer_data = xfer->data;
+    ToxPRPL_XferData* xfer_data = xfer->data;
 
     if (xfer_data->idle_write_data != NULL) {
-        IdleWriteData* idle_write_data = xfer_data->idle_write_data;
+        ToxPRPL_IdleWriteData* idle_write_data = xfer_data->idle_write_data;
         idle_write_data->running = FALSE;
         xfer_data->idle_write_data = NULL;
     }
@@ -176,7 +176,7 @@ void ToxPRPL_Purple_incomingTransferDenied(PurpleXfer* xfer) {
     toxprpl_return_if_fail(xfer != NULL);
     toxprpl_return_if_fail(xfer->data != NULL);
 
-    toxprpl_xfer_data* xfer_data = xfer->data;
+    ToxPRPL_XferData* xfer_data = xfer->data;
     if (xfer_data->tox != NULL) {
         tox_file_send_control(xfer_data->tox, xfer_data->friendnumber, 1,
                               xfer_data->filenumber, TOX_FILECONTROL_KILL, NULL, 0);
@@ -191,7 +191,7 @@ void ToxPRPL_Purple_incomingTransferDenied(PurpleXfer* xfer) {
 void ToxPRPL_Purple_cancelIncomingTransfer(PurpleXfer* xfer) {
     purple_debug_info("toxprpl", "xfer_cancel_recv\n");
     toxprpl_return_if_fail(xfer != NULL);
-    toxprpl_xfer_data* xfer_data = xfer->data;
+    ToxPRPL_XferData* xfer_data = xfer->data;
 
     if (xfer_data->tox != NULL) {
         tox_file_send_control(xfer_data->tox, xfer_data->friendnumber,
@@ -209,7 +209,7 @@ void ToxPRPL_Purple_cancelOutgoingXfer(PurpleXfer* xfer) {
     toxprpl_return_if_fail(xfer != NULL);
     toxprpl_return_if_fail(xfer->data != NULL);
 
-    toxprpl_xfer_data* xfer_data = xfer->data;
+    ToxPRPL_XferData* xfer_data = xfer->data;
 
     if (xfer_data->tox != NULL) {
         tox_file_send_control(xfer_data->tox, xfer_data->friendnumber,
@@ -224,7 +224,7 @@ void ToxPRPL_Purple_cancelOutgoingXfer(PurpleXfer* xfer) {
 void ToxPRPL_Purple_onTransferCompleted(PurpleXfer* xfer) {
     purple_debug_info("toxprpl", "xfer_end\n");
     toxprpl_return_if_fail(xfer != NULL);
-    toxprpl_xfer_data* xfer_data = xfer->data;
+    ToxPRPL_XferData* xfer_data = xfer->data;
 
     if (purple_xfer_get_type(xfer) == PURPLE_XFER_SEND) {
         tox_file_send_control(xfer_data->tox, xfer_data->friendnumber,
@@ -251,10 +251,10 @@ PurpleXfer* ToxPRPL_Purple_onTransferReceive(PurpleConnection* gc, const char* w
     PurpleXfer* xfer = purple_xfer_new(account, PURPLE_XFER_RECEIVE, who);
     toxprpl_return_val_if_fail(xfer != NULL, NULL);
 
-    toxprpl_xfer_data* xfer_data = g_new0(toxprpl_xfer_data, 1);
+    ToxPRPL_XferData* xfer_data = g_new0(ToxPRPL_XferData, 1);
     toxprpl_return_val_if_fail(xfer_data != NULL, NULL);
 
-    toxprpl_plugin_data* plugin_data = purple_connection_get_protocol_data(gc);
+    ToxPRPL_PluginData* plugin_data = purple_connection_get_protocol_data(gc);
     toxprpl_return_val_if_fail(plugin_data != NULL, NULL);
 
     xfer_data->tox = plugin_data->tox;
@@ -286,7 +286,7 @@ gboolean ToxPRPL_Purple_canReceiveFileCheck(PurpleConnection* gc, const char* wh
     toxprpl_return_val_if_fail(gc != NULL, FALSE);
     toxprpl_return_val_if_fail(who != NULL, FALSE);
 
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
+    ToxPRPL_PluginData* plugin = purple_connection_get_protocol_data(gc);
     toxprpl_return_val_if_fail(plugin != NULL && plugin->tox != NULL, FALSE);
 
     PurpleAccount* account = purple_connection_get_account(gc);
@@ -295,7 +295,7 @@ gboolean ToxPRPL_Purple_canReceiveFileCheck(PurpleConnection* gc, const char* wh
     PurpleBuddy* buddy = purple_find_buddy(account, who);
     toxprpl_return_val_if_fail(buddy != NULL, FALSE);
 
-    toxprpl_buddy_data* buddy_data = purple_buddy_get_protocol_data(buddy);
+    ToxPRPL_BuddyData* buddy_data = purple_buddy_get_protocol_data(buddy);
     toxprpl_return_val_if_fail(buddy_data != NULL, FALSE);
 
     return tox_get_friend_connection_status(plugin->tox,

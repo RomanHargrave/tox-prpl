@@ -17,7 +17,7 @@ PurpleXfer* ToxPRPL_findXfer(PurpleConnection* gc, int friendnumber, uint8_t fil
 
     while (xfers != NULL && xfers->data != NULL) {
         PurpleXfer* xfer = xfers->data;
-        toxprpl_xfer_data* xfer_data = xfer->data;
+        ToxPRPL_XferData* xfer_data = xfer->data;
         if (xfer_data != NULL &&
             xfer_data->friendnumber == friendnumber &&
             xfer_data->filenumber == filenumber) {
@@ -44,7 +44,7 @@ PurpleXfer* ToxPRPL_newXfer(PurpleConnection* gc, const gchar* who) {
     PurpleXfer* xfer = purple_xfer_new(account, PURPLE_XFER_SEND, who);
     toxprpl_return_val_if_fail(xfer != NULL, NULL);
 
-    toxprpl_xfer_data* xfer_data = g_new0(toxprpl_xfer_data, 1);
+    ToxPRPL_XferData* xfer_data = g_new0(ToxPRPL_XferData, 1);
     toxprpl_return_val_if_fail(xfer_data != NULL, NULL);
 
     xfer->data = xfer_data;

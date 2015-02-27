@@ -1,6 +1,7 @@
 /*
  * Contains definitions for account management
  */
+#pragma once
 
 /*
  * Defined in ``purple/account.c''

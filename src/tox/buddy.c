@@ -31,8 +31,8 @@ void ToxPRPL_Tox_onUserConnectionStatusChange(Tox* tox, int32_t fnum, uint8_t st
 /*
  * Tox/Purple glue dialog action that handles acceptance of a friend request
  */
-void ToxPRPL_Action_acceptFriendRequest(toxprpl_accept_friend_data* data) {
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(data->gc);
+void ToxPRPL_Action_acceptFriendRequest(ToxPRPL_FriendAcceptData* data) {
+    ToxPRPL_PluginData* plugin = purple_connection_get_protocol_data(data->gc);
 
     int ret = ToxPRPL_Purple_addFriend(plugin->tox, data->gc, data->buddy_key,
                                        FALSE, NULL);
@@ -59,7 +59,7 @@ void ToxPRPL_Action_acceptFriendRequest(toxprpl_accept_friend_data* data) {
         buddy = purple_buddy_new(account, data->buddy_key, NULL);
     }
 
-    toxprpl_buddy_data* buddy_data = g_new0(toxprpl_buddy_data, 1);
+    ToxPRPL_BuddyData* buddy_data = g_new0(ToxPRPL_BuddyData, 1);
     buddy_data->tox_friendlist_number = ret;
     purple_buddy_set_protocol_data(buddy, buddy_data);
     purple_blist_add_buddy(buddy, NULL, NULL, NULL);
@@ -77,7 +77,7 @@ void ToxPRPL_Action_acceptFriendRequest(toxprpl_accept_friend_data* data) {
 /*
  * Tox/Purple glue dialog action that handles rejection (ignore) of a friend request
  */
-void ToxPRPL_Action_rejectFriendRequest(toxprpl_accept_friend_data* data) {
+void ToxPRPL_Action_rejectFriendRequest(ToxPRPL_FriendAcceptData* data) {
     g_free(data->buddy_key);
     g_free(data);
 }
@@ -110,7 +110,7 @@ void ToxPRPL_Tox_onFriendRequest(struct Tox* tox, uint8_t* public_key, uint8_t* 
         request_msg = g_strndup((const gchar*) data, length);
     }
 
-    toxprpl_accept_friend_data* fdata = g_new0(toxprpl_accept_friend_data, 1);
+    ToxPRPL_FriendAcceptData* fdata = g_new0(ToxPRPL_FriendAcceptData, 1);
     fdata->gc = gc;
     fdata->buddy_key = buddy_key;
     purple_request_yes_no(gc, "New friend request", dialog_message,

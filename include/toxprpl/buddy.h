@@ -9,9 +9,9 @@ void ToxPRPL_Purple_removeBuddy(PurpleConnection* gc, PurpleBuddy* buddy, Purple
 
 void ToxPRPL_Purple_addBuddy(PurpleConnection*, PurpleBuddy*, PurpleGroup*, const char*);
 
-void ToxPRPL_Action_acceptFriendRequest(toxprpl_accept_friend_data*);
+void ToxPRPL_Action_acceptFriendRequest(ToxPRPL_FriendAcceptData*);
 
-void ToxPRPL_Action_rejectFriendRequest(toxprpl_accept_friend_data*);
+void ToxPRPL_Action_rejectFriendRequest(ToxPRPL_FriendAcceptData*);
 
 const char* ToxPRPL_Purple_getListIconForUser(PurpleAccount*, PurpleBuddy*);
 
