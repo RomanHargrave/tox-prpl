@@ -47,16 +47,11 @@
 
 void toxprpl_login(PurpleAccount* acct);
 
-// Start of file transfer functions ------------------------------------------------------------------------------------
+// prpl chat functions ------------------------------------------------
 
 /*
- * File transfer callbacks
- * Implementation resides in `impl/xfers.c`
+ * In file ``purple/chat.c''
  */
-
-// End of file transfer functions --------------------------------------------------------------------------------------
-
-// prpl chat functions ------------------------------------------------
 
 int toxprpl_send_im(PurpleConnection*, const char*, const char*, PurpleMessageFlags);
 
@@ -65,6 +60,10 @@ unsigned int toxprpl_send_typing(PurpleConnection*, const char*, PurpleTypingSta
 // end prpl chat functions --------------------------------------------
 
 // PRPL Commands -------------------------------------------------------------------------------------------------------
+
+/*
+ * In file ``purple/commands.c''
+ */
 
 /*
  * /myid command
@@ -80,17 +79,25 @@ static PurpleCmdRet toxprpl_nick_cmd_cb(PurpleConversation*, const gchar*, gchar
 
 // Tox Callbacks -------------------------------------------------------------------------------------------------------
 
+/*
+ * In file ``tox/buddy.c''
+ */
+
 void on_connectionstatus(Tox*, int32_t, uint8_t, void*);
 
 void on_request(struct Tox*, const uint8_t*, const uint8_t*, uint16_t, void*);
 
 void on_friend_action(Tox*, int32_t, const uint8_t*, uint16_t, void*);
 
-void on_incoming_message(Tox*, int32_t, const uint8_t*, uint16_t, void*);
-
 void on_nick_change(Tox*, int32_t, const uint8_t*, uint16_t, void*);
 
 void on_status_change(struct Tox*, int32_t, uint8_t, void*);
+
+/*
+ * In file ``tox/chat.c''
+ */
+
+void on_incoming_message(Tox*, int32_t, const uint8_t*, uint16_t, void*);
 
 void on_typing_change(Tox*, int32_t, uint8_t, void*);
 
@@ -347,7 +354,7 @@ void toxprpl_login_after_setup(PurpleAccount* acct) {
     tox_callback_typing_change(tox, on_typing_change, gc);
 
     /*
-     * Implemented in ``impl/xfers.c''
+     * Implemented in ``common/xfers.c''
      */
     tox_callback_file_send_request(tox, on_file_send_request, gc);
     tox_callback_file_control(tox, on_file_control, gc);
@@ -691,7 +698,7 @@ static PurplePluginProtocolInfo prpl_info = {
 
         // File transfers ----------------------------------------------------------------------------------------------
 
-        // These and related functions are defined in ``impl/xfers.c''
+        // These and related functions are defined in ``common/xfers.c''
 
         .can_receive_file   = toxprpl_can_receive_file,
         .send_file          = toxprpl_send_file,

@@ -34,7 +34,7 @@ set(SOURCE_FILES
 	src/tox/buddy.c
 	src/tox/chat.c
 	src/tox/xfers.c
-	src/impl/xfers.c
+	src/common/xfers.c
 	src/toxprpl.c)
 
 include_directories(include)
