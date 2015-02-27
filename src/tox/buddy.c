@@ -21,10 +21,10 @@ void ToxPRPL_Tox_onUserConnectionStatusChange(Tox* tox, int32_t fnum, uint8_t st
         return;
     }
 
-    gchar* buddy_key = toxprpl_tox_bin_id_to_string(client_id);
+    gchar* buddy_key = ToxPRPL_toxClientIdToString(client_id);
     PurpleAccount* account = purple_connection_get_account(gc);
     purple_prpl_got_user_status(account, buddy_key,
-                                toxprpl_statuses[tox_status].id, NULL);
+                                ToxPRPL_ToxStatuses[tox_status].id, NULL);
     g_free(buddy_key);
 }
 
@@ -67,7 +67,7 @@ void ToxPRPL_Action_acceptFriendRequest(toxprpl_accept_friend_data* data) {
     purple_debug_info("toxprpl", "Friend %s has status %d\n",
                       data->buddy_key, userstatus);
     purple_prpl_got_user_status(account, data->buddy_key,
-                                toxprpl_statuses[toxprpl_get_status_index(plugin->tox, ret, userstatus)].id,
+                                ToxPRPL_ToxStatuses[ToxPRPL_getStatusTypeIndex(plugin->tox, ret, userstatus)].id,
                                 NULL);
 
     g_free(data->buddy_key);
@@ -88,7 +88,7 @@ void ToxPRPL_Tox_onFriendRequest(struct Tox* tox, const uint8_t* public_key, con
     gchar* dialog_message;
     PurpleConnection* gc = (PurpleConnection*) user_data;
 
-    gchar* buddy_key = toxprpl_tox_bin_id_to_string(public_key);
+    gchar* buddy_key = ToxPRPL_toxClientIdToString(public_key);
     purple_debug_info("toxprpl", "Buddy request from %s: %s\n",
                       buddy_key, data);
 
@@ -139,7 +139,7 @@ void ToxPRPL_Tox_onFriendAction(Tox* tox, int32_t friendnum, const uint8_t* stri
         return;
     }
 
-    gchar* buddy_key = toxprpl_tox_bin_id_to_string(client_id);
+    gchar* buddy_key = ToxPRPL_toxClientIdToString(client_id);
     gchar* safemsg = g_strndup((const char*) string, length);
     gchar* message = g_strdup_printf("/me %s", safemsg);
     g_free(safemsg);
@@ -163,7 +163,7 @@ void ToxPRPL_Tox_onFriendChangeNickname(Tox* tox, int32_t friendnum, const uint8
         return;
     }
 
-    gchar* buddy_key = toxprpl_tox_bin_id_to_string(client_id);
+    gchar* buddy_key = ToxPRPL_toxClientIdToString(client_id);
     PurpleAccount* account = purple_connection_get_account(gc);
     PurpleBuddy* buddy = purple_find_buddy(account, buddy_key);
     if (buddy == NULL) {
@@ -188,16 +188,16 @@ void ToxPRPL_Tox_onFriendChangeStatus(struct Tox* tox, int32_t friendnum, uint8_
         return;
     }
 
-    gchar* buddy_key = toxprpl_tox_bin_id_to_string(client_id);
+    gchar* buddy_key = ToxPRPL_toxClientIdToString(client_id);
 
     PurpleConnection* gc = (PurpleConnection*) user_data;
     PurpleAccount* account = purple_connection_get_account(gc);
     purple_debug_info("toxprpl", "Setting user status for user %s to %s\n",
-                      buddy_key, toxprpl_statuses[
-                    toxprpl_get_status_index(tox, friendnum, userstatus)].id);
+                      buddy_key, ToxPRPL_ToxStatuses[
+                    ToxPRPL_getStatusTypeIndex(tox, friendnum, userstatus)].id);
     purple_prpl_got_user_status(account, buddy_key,
-                                toxprpl_statuses[
-                                        toxprpl_get_status_index(tox, friendnum, userstatus)].id,
+                                ToxPRPL_ToxStatuses[
+                                        ToxPRPL_getStatusTypeIndex(tox, friendnum, userstatus)].id,
                                 NULL);
     g_free(buddy_key);
 }

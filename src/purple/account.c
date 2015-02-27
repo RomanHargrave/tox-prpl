@@ -188,7 +188,7 @@ void ToxPRPL_Purple_onSetStatus(PurpleAccount* account, PurpleStatus* status) {
 
     purple_debug_info("toxprpl", "setting status %s\n", status_id);
 
-    TOX_USERSTATUS tox_status = toxprpl_get_tox_status_from_id(status_id);
+    TOX_USERSTATUS tox_status = ToxPRPL_getStatusTypeById(status_id);
     if (tox_status == TOX_USERSTATUS_INVALID) {
         purple_debug_info("toxprpl", "status %s is invalid\n", status_id);
         return;
@@ -211,7 +211,7 @@ void ToxPRPL_showIDNumberDialog(PurplePluginAction* action) {
 
     uint8_t bin_id[TOX_FRIEND_ADDRESS_SIZE];
     tox_get_address(plugin->tox, bin_id);
-    gchar* id = toxprpl_tox_friend_id_to_string(bin_id);
+    gchar* id = ToxPRPL_toxFriendIdToString(bin_id);
 
     purple_notify_message(gc,
                           PURPLE_NOTIFY_MSG_INFO,
@@ -250,7 +250,7 @@ void ToxPRPL_showExportDialog(PurplePluginAction* action) {
 
     uint8_t bin_id[TOX_FRIEND_ADDRESS_SIZE];
     tox_get_address(plugin->tox, bin_id);
-    gchar* id = toxprpl_tox_friend_id_to_string(bin_id);
+    gchar* id = ToxPRPL_toxFriendIdToString(bin_id);
     strcpy(id + TOX_CLIENT_ID_SIZE, ".tox\0"); // insert extension instead of nospam
 
     purple_request_file(gc,

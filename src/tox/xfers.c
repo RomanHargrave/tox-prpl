@@ -58,7 +58,7 @@ void ToxPRPL_Tox_onFileRequest(Tox* tox, int32_t friendnumber, uint8_t filenumbe
                           friendnumber);
         return;
     }
-    gchar* buddy_key = toxprpl_tox_bin_id_to_string(client_id);
+    gchar* buddy_key = ToxPRPL_toxClientIdToString(client_id);
 
     PurpleXfer* xfer = ToxPRPL_Purple_onTransferReceive(gc, buddy_key, friendnumber,
                                                         filenumber, filesize, (const char*) filename);

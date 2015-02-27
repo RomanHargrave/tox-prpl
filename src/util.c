@@ -5,40 +5,16 @@
 #include <toxprpl.h>
 #include <string.h>
 
+// Base Conversion (2 -> 16, 16 -> 2) ----------------------------------------------------------------------------------
+
 const char* g_HEX_CHARS = "0123456789abcdef";
 
-const toxprpl_status toxprpl_statuses[] =
-        {
-                {
-                        PURPLE_STATUS_AVAILABLE, TOXPRPL_STATUS_ONLINE,
-                        "tox_online", _("Online")
-                },
-                {
-                        PURPLE_STATUS_AWAY, TOXPRPL_STATUS_AWAY,
-                        "tox_away", _("Away")
-                },
-                {
-                        PURPLE_STATUS_UNAVAILABLE, TOXPRPL_STATUS_BUSY,
-                        "tox_busy", _("Busy")
-                },
-                {
-                        PURPLE_STATUS_OFFLINE, TOXPRPL_STATUS_OFFLINE,
-                        "tox_offline", _("Offline")
-                }
-        };
-
-/*
- * Kitchen Sink
- */
-
-char* toxprpl_data_to_hex_string(const unsigned char* data,
-                                        const size_t len) {
+char* ToxPRPL_binToHexString(const unsigned char* data, const size_t len) {
     unsigned char* chars;
     unsigned char hi, lo;
     size_t i;
     char* buf = malloc((len * 2) + 1);
     char* p = buf;
-    chars = (unsigned char*) data;
     chars = (unsigned char*) data;
     for (i = 0; i < len; i++) {
         unsigned char c = chars[i];
@@ -53,7 +29,7 @@ char* toxprpl_data_to_hex_string(const unsigned char* data,
     return buf;
 }
 
-unsigned char* toxprpl_hex_string_to_data(const char* s) {
+unsigned char* ToxPRPL_hexStringToBin(const char* s) {
     size_t len = strlen(s);
     unsigned char* buf = malloc(len / 2);
     unsigned char* p = buf;
@@ -84,8 +60,30 @@ unsigned char* toxprpl_hex_string_to_data(const char* s) {
     return buf;
 }
 
+// End Base Conversion -------------------------------------------------------------------------------------------------
+
+// Tox status type abstraction -----------------------------------------------------------------------------------------
+const toxprpl_status ToxPRPL_ToxStatuses[] = {
+        {
+                PURPLE_STATUS_AVAILABLE, TOXPRPL_STATUS_ONLINE,
+                "tox_online", _("Online")
+        },
+        {
+                PURPLE_STATUS_AWAY, TOXPRPL_STATUS_AWAY,
+                "tox_away", _("Away")
+        },
+        {
+                PURPLE_STATUS_UNAVAILABLE, TOXPRPL_STATUS_BUSY,
+                "tox_busy", _("Busy")
+        },
+        {
+                PURPLE_STATUS_OFFLINE, TOXPRPL_STATUS_OFFLINE,
+                "tox_offline", _("Offline")
+        }
+};
+
 // stay independent from the lib
-int toxprpl_get_status_index(Tox* tox, int fnum, TOX_USERSTATUS status) {
+int ToxPRPL_getStatusTypeIndex(Tox* tox, int fnum, TOX_USERSTATUS status) {
     switch (status) {
         case TOX_USERSTATUS_AWAY:
             return TOXPRPL_STATUS_AWAY;
@@ -103,24 +101,32 @@ int toxprpl_get_status_index(Tox* tox, int fnum, TOX_USERSTATUS status) {
     return TOXPRPL_STATUS_OFFLINE;
 }
 
-TOX_USERSTATUS toxprpl_get_tox_status_from_id(const char* status_id) {
+TOX_USERSTATUS ToxPRPL_getStatusTypeById(const char* status_id) {
     int i;
     for (i = 0; i < TOXPRPL_MAX_STATUS; i++) {
-        if (strcmp(toxprpl_statuses[i].id, status_id) == 0) {
-            return toxprpl_statuses[i].tox_status;
+        if (strcmp(ToxPRPL_ToxStatuses[i].id, status_id) == 0) {
+            return ToxPRPL_ToxStatuses[i].tox_status;
         }
     }
     return TOX_USERSTATUS_INVALID;
 }
 
+// End status type abstraction -----------------------------------------------------------------------------------------
+
+// Tox ID helpers ------------------------------------------------------------------------------------------------------
+
 /*
- * Tox helpers
+ * Returns a Base 16 string representation of the given client ID
  */
-
-gchar* toxprpl_tox_bin_id_to_string(const uint8_t* bin_id) {
-    return toxprpl_data_to_hex_string(bin_id, TOX_CLIENT_ID_SIZE);
+gchar* ToxPRPL_toxClientIdToString(const uint8_t* bin_id) {
+    return ToxPRPL_binToHexString(bin_id, TOX_CLIENT_ID_SIZE);
 }
 
-gchar* toxprpl_tox_friend_id_to_string(uint8_t* bin_id) {
-    return toxprpl_data_to_hex_string(bin_id, TOX_FRIEND_ADDRESS_SIZE);
+/*
+ * Returns a Base 16 string representation of the given friend/user ID
+ */
+gchar* ToxPRPL_toxFriendIdToString(uint8_t* bin_id) {
+    return ToxPRPL_binToHexString(bin_id, TOX_FRIEND_ADDRESS_SIZE);
 }
+
+// End ID helpers ------------------------------------------------------------------------------------------------------

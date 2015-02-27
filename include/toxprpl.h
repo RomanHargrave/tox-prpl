@@ -79,23 +79,22 @@
 
 // util.c start --------------------------------------------------------------------------------------------------------
 
-extern const char* g_HEX_CHARS;
-extern const toxprpl_status toxprpl_statuses[];
+extern const toxprpl_status ToxPRPL_ToxStatuses[];
 
 /*
  * Kitchen sink
  */
 
-char* toxprpl_data_to_hex_string(const unsigned char*, const size_t);
-unsigned char* toxprpl_hex_string_to_data(const char*);
-int toxprpl_get_status_index(Tox*, int, TOX_USERSTATUS);
-TOX_USERSTATUS toxprpl_get_tox_status_from_id(const char*);
+char* ToxPRPL_binToHexString(const unsigned char*, const size_t);
+unsigned char* ToxPRPL_hexStringToBin(const char*);
+int ToxPRPL_getStatusTypeIndex(Tox*, int, TOX_USERSTATUS);
+TOX_USERSTATUS ToxPRPL_getStatusTypeById(const char*);
 
 /*
  * Tox helpers
  */
 
-gchar* toxprpl_tox_bin_id_to_string(const uint8_t*);
-gchar* toxprpl_tox_friend_id_to_string(uint8_t*);
+gchar* ToxPRPL_toxClientIdToString(const uint8_t*);
+gchar* ToxPRPL_toxFriendIdToString(uint8_t*);
 
 // util.c end ----------------------------------------------------------------------------------------------------------

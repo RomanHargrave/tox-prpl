@@ -17,7 +17,7 @@ void ToxPRPL_Tox_onMessageReceived(Tox* tox, int32_t friendnum, const uint8_t* s
         return;
     }
 
-    gchar* buddy_key = toxprpl_tox_bin_id_to_string(client_id);
+    gchar* buddy_key = ToxPRPL_toxClientIdToString(client_id);
     gchar* safemsg = g_strndup((const char*) string, length);
     serv_got_im(gc, buddy_key, safemsg, PURPLE_MESSAGE_RECV,
                 time(NULL));
@@ -38,7 +38,7 @@ void ToxPRPL_Tox_onUserTypingChange(Tox* tox, int32_t friendnum, uint8_t is_typi
         return;
     }
 
-    gchar* buddy_key = toxprpl_tox_bin_id_to_string(client_id);
+    gchar* buddy_key = ToxPRPL_toxClientIdToString(client_id);
     PurpleAccount* account = purple_connection_get_account(gc);
     PurpleBuddy* buddy = purple_find_buddy(account, buddy_key);
     if (buddy == NULL) {

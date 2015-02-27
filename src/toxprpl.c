@@ -188,8 +188,8 @@ static GList* toxprpl_status_types(PurpleAccount* acct) {
     purple_debug_info("toxprpl", "setting up status types\n");
 
     for (i = 0; i < TOXPRPL_MAX_STATUS; i++) {
-        type = purple_status_type_new_with_attrs(toxprpl_statuses[i].primitive,
-                                                 toxprpl_statuses[i].id, toxprpl_statuses[i].title, TRUE, TRUE,
+        type = purple_status_type_new_with_attrs(ToxPRPL_ToxStatuses[i].primitive,
+                                                 ToxPRPL_ToxStatuses[i].id, ToxPRPL_ToxStatuses[i].title, TRUE, TRUE,
                                                  FALSE,
                                                  "message", _("Message"), purple_value_new(PURPLE_TYPE_STRING),
                                                  NULL);
@@ -215,7 +215,7 @@ static void toxprpl_sync_add_buddy(PurpleAccount* account, Tox* tox,
         return;
     }
 
-    gchar* buddy_key = toxprpl_tox_bin_id_to_string(client_id);
+    gchar* buddy_key = ToxPRPL_toxClientIdToString(client_id);
 
 
     PurpleBuddy* buddy;
@@ -238,8 +238,8 @@ static void toxprpl_sync_add_buddy(PurpleAccount* account, Tox* tox,
     purple_debug_info("toxprpl", "Friend %s has status %d\n", buddy_key,
                       userstatus);
     purple_prpl_got_user_status(account, buddy_key,
-                                toxprpl_statuses[
-                                        toxprpl_get_status_index(tox, friend_number, userstatus)].id,
+                                ToxPRPL_ToxStatuses[
+                                        ToxPRPL_getStatusTypeIndex(tox, friend_number, userstatus)].id,
                                 NULL);
     g_free(buddy_key);
 }
@@ -263,7 +263,7 @@ static void toxprpl_sync_friends(PurpleAccount* acct, Tox* tox) {
             int fnum = friendlist[i];
             uint8_t bin_id[TOX_CLIENT_ID_SIZE];
             if (tox_get_client_id(tox, fnum, bin_id) == 0) {
-                gchar* str_id = toxprpl_tox_bin_id_to_string(bin_id);
+                gchar* str_id = ToxPRPL_toxClientIdToString(bin_id);
                 while (iterator != NULL) {
                     PurpleBuddy* buddy = iterator->data;
                     if (strcmp(buddy->name, str_id) == 0) {
@@ -400,7 +400,7 @@ void toxprpl_login_after_setup(PurpleAccount* acct) {
     const char* ip = purple_account_get_string(acct, "dht_server",
                                                DEFAULT_SERVER_IP);
 
-    unsigned char* bin_str = toxprpl_hex_string_to_data(key);
+    unsigned char* bin_str = ToxPRPL_hexStringToBin(key);
 
     purple_debug_info("toxprpl", "Will connect to %s:%d (%s)\n",
                       ip, port, key);

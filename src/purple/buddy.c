@@ -8,7 +8,7 @@
  */
 int ToxPRPL_Purple_addFriend(Tox* tox, PurpleConnection* gc, const char* buddy_key, gboolean sendrequest,
                              const char* message) {
-    unsigned char* bin_key = toxprpl_hex_string_to_data(buddy_key);
+    unsigned char* bin_key = ToxPRPL_hexStringToBin(buddy_key);
     int ret;
 
     if (sendrequest == TRUE) {
@@ -80,7 +80,7 @@ void ToxPRPL_Purple_getBuddyInfo(gpointer data, gpointer user_data) {
 
     toxprpl_buddy_data* buddy_data = purple_buddy_get_protocol_data(buddy);
     if (buddy_data == NULL) {
-        unsigned char* bin_key = toxprpl_hex_string_to_data(buddy->name);
+        unsigned char* bin_key = ToxPRPL_hexStringToBin(buddy->name);
         int fnum = tox_get_friend_number(plugin->tox, bin_key);
         buddy_data = g_new0(toxprpl_buddy_data, 1);
         buddy_data->tox_friendlist_number = fnum;
@@ -88,13 +88,13 @@ void ToxPRPL_Purple_getBuddyInfo(gpointer data, gpointer user_data) {
         g_free(bin_key);
     }
 
-    int statusIndex = toxprpl_get_status_index(plugin->tox, buddy_data->tox_friendlist_number,
-                                               tox_get_user_status(plugin->tox, buddy_data->tox_friendlist_number));
+    int statusIndex = ToxPRPL_getStatusTypeIndex(plugin->tox, buddy_data->tox_friendlist_number,
+                                                 tox_get_user_status(plugin->tox, buddy_data->tox_friendlist_number));
 
     PurpleAccount* account = purple_connection_get_account(gc);
     purple_debug_info("toxprpl", "Setting user status for user %s to %s\n",
-                      buddy->name, toxprpl_statuses[statusIndex].id);
-    purple_prpl_got_user_status(account, buddy->name, toxprpl_statuses[statusIndex].id, NULL);
+                      buddy->name, ToxPRPL_ToxStatuses[statusIndex].id);
+    purple_prpl_got_user_status(account, buddy->name, ToxPRPL_ToxStatuses[statusIndex].id, NULL);
 
     uint8_t alias[TOX_MAX_NAME_LENGTH + 1];
     if (tox_get_name(plugin->tox, buddy_data->tox_friendlist_number, alias) == 0) {
