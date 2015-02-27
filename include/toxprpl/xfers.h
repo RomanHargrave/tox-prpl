@@ -4,27 +4,27 @@
  * From ``common/xfers.c''
  */
 
-PurpleXfer* toxprpl_find_xfer(PurpleConnection*, int, uint8_t);
+PurpleXfer* ToxPRPL_findXfer(PurpleConnection*, int, uint8_t);
 
-PurpleXfer* toxprpl_new_xfer_receive(PurpleConnection*, const char*, int, int, const goffset, const char*);
+PurpleXfer* ToxPRPL_Purple_onTransferReceive(PurpleConnection*, const char*, int, int, const goffset, const char*);
 
-PurpleXfer* toxprpl_new_xfer(PurpleConnection*, const gchar*);
+PurpleXfer* ToxPRPL_newXfer(PurpleConnection*, const gchar*);
 
 /*
  * From ``purple/xfers.c''
  */
 
-void toxprpl_xfer_init(PurpleXfer*);
+void ToxPRPL_Purple_prepareXfer(PurpleXfer*);
 
-void toxprpl_xfer_start(PurpleXfer*);
+void ToxPRPL_Purple_startXfer(PurpleXfer*);
 
-gssize toxprpl_xfer_write(const guchar*, size_t, PurpleXfer*);
+gssize ToxPRPL_Purple_writeXfer(const guchar*, size_t, PurpleXfer*);
 
-gssize toxprpl_xfer_read(guchar**, PurpleXfer*);
+gssize ToxPRPL_purpleDummyReadXfer(guchar**, PurpleXfer*);
 
-void toxprpl_xfer_cancel_send(PurpleXfer*);
+void ToxPRPL_Purple_cancelOutgoingXfer(PurpleXfer*);
 
-void toxprpl_xfer_end(PurpleXfer*);
+void ToxPRPL_Purple_onTransferCompleted(PurpleXfer*);
 
 /*
  * LibPurple file transfer backend
@@ -32,11 +32,11 @@ void toxprpl_xfer_end(PurpleXfer*);
  * - toxprpl_send_file
  * - toxprpl_new_xfer
  */
-gboolean toxprpl_can_receive_file(PurpleConnection*, const char*);
+gboolean ToxPRPL_Purple_canReceiveFileCheck(PurpleConnection*, const char*);
 
-void toxprpl_send_file(PurpleConnection*, const char*, const char*);
+void ToxPRPL_Purple_sendFile(PurpleConnection*, const char*, const char*);
 
-PurpleXfer* toxprpl_new_xfer(PurpleConnection*, const gchar*);
+PurpleXfer* ToxPRPL_newXfer(PurpleConnection*, const gchar*);
 
 /*
  * From ``tox/xfers.c''

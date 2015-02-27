@@ -30,11 +30,11 @@ typedef struct {
     uint8_t* buffer;
     uint8_t* offset;
     gboolean running;
-} toxprpl_idle_write_data;
+} IdleWriteData;
 
 typedef struct {
     Tox* tox;
     int friendnumber;
     uint8_t filenumber;
-    toxprpl_idle_write_data* idle_write_data;
+    IdleWriteData* idle_write_data;
 } toxprpl_xfer_data;

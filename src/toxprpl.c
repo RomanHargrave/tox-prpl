@@ -700,9 +700,9 @@ static PurplePluginProtocolInfo prpl_info = {
 
         // These and related functions are defined in ``common/xfers.c''
 
-        .can_receive_file   = toxprpl_can_receive_file,
-        .send_file          = toxprpl_send_file,
-        .new_xfer           = toxprpl_new_xfer,
+        .can_receive_file   = ToxPRPL_Purple_canReceiveFileCheck,
+        .send_file          = ToxPRPL_Purple_sendFile,
+        .new_xfer           = ToxPRPL_newXfer,
 
         // ToxAV -------------------------------------------------------------------------------------------------------
 

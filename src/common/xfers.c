@@ -9,7 +9,7 @@
 #include <toxprpl/xfers.h>
 
 //TODO create an inverted table to speed this up
-PurpleXfer* toxprpl_find_xfer(PurpleConnection* gc, int friendnumber, uint8_t filenumber) {
+PurpleXfer* ToxPRPL_findXfer(PurpleConnection* gc, int friendnumber, uint8_t filenumber) {
     PurpleAccount* account = purple_connection_get_account(gc);
     toxprpl_return_val_if_fail(account != NULL, NULL);
     GList* xfers = purple_xfers_get_all();
@@ -30,9 +30,9 @@ PurpleXfer* toxprpl_find_xfer(PurpleConnection* gc, int friendnumber, uint8_t fi
 
 /*
  * Purple callback to initiate a file transfer to a given user.
- * Also called by toxprpl_send_file when seeking to initiate a file transfer
+ * Also called by ToxPRPL_Purple_sendFile when seeking to initiate a file transfer
  */
-PurpleXfer* toxprpl_new_xfer(PurpleConnection* gc, const gchar* who) {
+PurpleXfer* ToxPRPL_newXfer(PurpleConnection* gc, const gchar* who) {
     purple_debug_info("toxprpl", "new_xfer\n");
 
     toxprpl_return_val_if_fail(gc != NULL, NULL);
@@ -49,12 +49,12 @@ PurpleXfer* toxprpl_new_xfer(PurpleConnection* gc, const gchar* who) {
 
     xfer->data = xfer_data;
 
-    purple_xfer_set_init_fnc(xfer, toxprpl_xfer_init);
-    purple_xfer_set_start_fnc(xfer, toxprpl_xfer_start);
-    purple_xfer_set_write_fnc(xfer, toxprpl_xfer_write);
-    purple_xfer_set_read_fnc(xfer, toxprpl_xfer_read);
-    purple_xfer_set_cancel_send_fnc(xfer, toxprpl_xfer_cancel_send);
-    purple_xfer_set_end_fnc(xfer, toxprpl_xfer_end);
+    purple_xfer_set_init_fnc(xfer, ToxPRPL_Purple_prepareXfer);
+    purple_xfer_set_start_fnc(xfer, ToxPRPL_Purple_startXfer);
+    purple_xfer_set_write_fnc(xfer, ToxPRPL_Purple_writeXfer);
+    purple_xfer_set_read_fnc(xfer, ToxPRPL_purpleDummyReadXfer);
+    purple_xfer_set_cancel_send_fnc(xfer, ToxPRPL_Purple_cancelOutgoingXfer);
+    purple_xfer_set_end_fnc(xfer, ToxPRPL_Purple_onTransferCompleted);
 
     return xfer;
 }

@@ -11,7 +11,7 @@ void on_file_control(Tox* tox, int32_t friendnumber, uint8_t receive_send, uint8
     PurpleConnection* gc = userdata;
     toxprpl_return_if_fail(gc != NULL);
 
-    PurpleXfer* xfer = toxprpl_find_xfer(gc, friendnumber, filenumber);
+    PurpleXfer* xfer = ToxPRPL_findXfer(gc, friendnumber, filenumber);
     toxprpl_return_if_fail(xfer != NULL);
 
     if (receive_send == 0) //receiving
@@ -62,8 +62,8 @@ void on_file_send_request(Tox* tox, int32_t friendnumber,
     }
     gchar* buddy_key = toxprpl_tox_bin_id_to_string(client_id);
 
-    PurpleXfer* xfer = toxprpl_new_xfer_receive(gc, buddy_key, friendnumber,
-                                                filenumber, filesize, (const char*) filename);
+    PurpleXfer* xfer = ToxPRPL_Purple_onTransferReceive(gc, buddy_key, friendnumber,
+                                                        filenumber, filesize, (const char*) filename);
     if (xfer == NULL) {
         purple_debug_warning("toxprpl", "could not create xfer\n");
         g_free(buddy_key);
@@ -83,7 +83,7 @@ void on_file_data(Tox* tox, int32_t friendnumber, uint8_t filenumber,
 
     toxprpl_return_if_fail(gc != NULL);
 
-    PurpleXfer* xfer = toxprpl_find_xfer(gc, friendnumber, filenumber);
+    PurpleXfer* xfer = ToxPRPL_findXfer(gc, friendnumber, filenumber);
     toxprpl_return_if_fail(xfer != NULL);
     toxprpl_return_if_fail(xfer->dest_fp != NULL);
 

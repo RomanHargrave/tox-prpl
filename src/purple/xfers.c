@@ -3,7 +3,7 @@
 
 #include <string.h>
 
-void toxprpl_xfer_init(PurpleXfer* xfer) {
+void ToxPRPL_Purple_prepareXfer(PurpleXfer* xfer) {
     purple_debug_info("toxprpl", "xfer_init\n");
     toxprpl_return_if_fail(xfer != NULL);
 
@@ -51,7 +51,7 @@ void toxprpl_xfer_init(PurpleXfer* xfer) {
 }
 
 
-gboolean toxprpl_xfer_idle_write(toxprpl_idle_write_data* data) {
+gboolean ToxPRPL_writeIdleData(IdleWriteData* data) {
     toxprpl_return_val_if_fail(data != NULL, FALSE);
     // If running is false the transfer was stopped and data->xfer
     // may have been deleted already
@@ -77,7 +77,7 @@ gboolean toxprpl_xfer_idle_write(toxprpl_idle_write_data* data) {
     return FALSE;
 }
 
-void toxprpl_xfer_start(PurpleXfer* xfer) {
+void ToxPRPL_Purple_startXfer(PurpleXfer* xfer) {
     purple_debug_info("toxprpl", "xfer_start\n");
     toxprpl_return_if_fail(xfer != NULL);
     toxprpl_return_if_fail(xfer->data != NULL);
@@ -98,7 +98,7 @@ void toxprpl_xfer_start(PurpleXfer* xfer) {
             return;
         }
 
-        toxprpl_idle_write_data* data = g_new0(toxprpl_idle_write_data, 1);
+        IdleWriteData* data = g_new0(IdleWriteData, 1);
         if (data == NULL) {
             purple_debug_warning("toxprpl", "data == NULL");
             g_free(buffer);
@@ -110,7 +110,7 @@ void toxprpl_xfer_start(PurpleXfer* xfer) {
         data->running = TRUE;
         xfer_data->idle_write_data = data;
 
-        g_idle_add((GSourceFunc) toxprpl_xfer_idle_write, data);
+        g_idle_add((GSourceFunc) ToxPRPL_writeIdleData, data);
     }
 }
 
@@ -118,7 +118,7 @@ void toxprpl_xfer_start(PurpleXfer* xfer) {
  * LibPurple function that is called during an outgoing file transfer in order to write
  * data to the recipient
  */
-gssize toxprpl_xfer_write(const guchar* data, size_t len, PurpleXfer* xfer) {
+gssize ToxPRPL_Purple_writeXfer(const guchar* data, size_t len, PurpleXfer* xfer) {
     toxprpl_return_val_if_fail(data != NULL, -1);
     toxprpl_return_val_if_fail(len > 0, -1);
     toxprpl_return_val_if_fail(xfer != NULL, -1);
@@ -142,7 +142,7 @@ gssize toxprpl_xfer_write(const guchar* data, size_t len, PurpleXfer* xfer) {
 /*
  * LibPurple callback dummy
  */
-gssize toxprpl_xfer_read(guchar** data, PurpleXfer* xfer) {
+gssize ToxPRPL_purpleDummyReadXfer(guchar** data, PurpleXfer* xfer) {
     //dummy callback
     return -1;
 }
@@ -151,7 +151,7 @@ gssize toxprpl_xfer_read(guchar** data, PurpleXfer* xfer) {
  * General-purpose garbage collection function.
  * Frees up resources used during a file transfer
  */
-void toxprpl_xfer_free(PurpleXfer* xfer) {
+void ToxPRPL_freeXfer(PurpleXfer* xfer) {
     purple_debug_info("toxprpl", "xfer_free\n");
     toxprpl_return_if_fail(xfer != NULL);
     toxprpl_return_if_fail(xfer->data != NULL);
@@ -159,7 +159,7 @@ void toxprpl_xfer_free(PurpleXfer* xfer) {
     toxprpl_xfer_data* xfer_data = xfer->data;
 
     if (xfer_data->idle_write_data != NULL) {
-        toxprpl_idle_write_data* idle_write_data = xfer_data->idle_write_data;
+        IdleWriteData* idle_write_data = xfer_data->idle_write_data;
         idle_write_data->running = FALSE;
         xfer_data->idle_write_data = NULL;
     }
@@ -171,7 +171,7 @@ void toxprpl_xfer_free(PurpleXfer* xfer) {
  * LibPurple callback that is invoked when the frontend declines an incoming request
  * to receive a file transfer
  */
-void toxprpl_xfer_request_denied(PurpleXfer* xfer) {
+void ToxPRPL_Purple_incomingTransferDenied(PurpleXfer* xfer) {
     purple_debug_info("toxprpl", "xfer_request_denied\n");
     toxprpl_return_if_fail(xfer != NULL);
     toxprpl_return_if_fail(xfer->data != NULL);
@@ -181,14 +181,14 @@ void toxprpl_xfer_request_denied(PurpleXfer* xfer) {
         tox_file_send_control(xfer_data->tox, xfer_data->friendnumber, 1,
                               xfer_data->filenumber, TOX_FILECONTROL_KILL, NULL, 0);
     }
-    toxprpl_xfer_free(xfer);
+    ToxPRPL_freeXfer(xfer);
 }
 
 /*
  * LibPurple callback that is invoked when the frontend wishes to cancel an incoming file
  * transfer
  */
-void toxprpl_xfer_cancel_recv(PurpleXfer* xfer) {
+void ToxPRPL_Purple_cancelIncomingTransfer(PurpleXfer* xfer) {
     purple_debug_info("toxprpl", "xfer_cancel_recv\n");
     toxprpl_return_if_fail(xfer != NULL);
     toxprpl_xfer_data* xfer_data = xfer->data;
@@ -197,14 +197,14 @@ void toxprpl_xfer_cancel_recv(PurpleXfer* xfer) {
         tox_file_send_control(xfer_data->tox, xfer_data->friendnumber,
                               1, xfer_data->filenumber, TOX_FILECONTROL_KILL, NULL, 0);
     }
-    toxprpl_xfer_free(xfer);
+    ToxPRPL_freeXfer(xfer);
 }
 
 /*
  * LibPurple callback referenced when configuring a new outgoing transfer.
  * Invoked when the frontend wishes to cancel an outgoing transfer.
  */
-void toxprpl_xfer_cancel_send(PurpleXfer* xfer) {
+void ToxPRPL_Purple_cancelOutgoingXfer(PurpleXfer* xfer) {
     purple_debug_info("toxprpl", "xfer_cancel_send\n");
     toxprpl_return_if_fail(xfer != NULL);
     toxprpl_return_if_fail(xfer->data != NULL);
@@ -215,13 +215,13 @@ void toxprpl_xfer_cancel_send(PurpleXfer* xfer) {
         tox_file_send_control(xfer_data->tox, xfer_data->friendnumber,
                               0, xfer_data->filenumber, TOX_FILECONTROL_KILL, NULL, 0);
     }
-    toxprpl_xfer_free(xfer);
+    ToxPRPL_freeXfer(xfer);
 }
 
 /*
  * LibPurple callback that is invoked when a file transfer is completed
  */
-void toxprpl_xfer_end(PurpleXfer* xfer) {
+void ToxPRPL_Purple_onTransferCompleted(PurpleXfer* xfer) {
     purple_debug_info("toxprpl", "xfer_end\n");
     toxprpl_return_if_fail(xfer != NULL);
     toxprpl_xfer_data* xfer_data = xfer->data;
@@ -235,11 +235,11 @@ void toxprpl_xfer_end(PurpleXfer* xfer) {
                               1, xfer_data->filenumber, TOX_FILECONTROL_FINISHED, NULL, 0);
     }
 
-    toxprpl_xfer_free(xfer);
+    ToxPRPL_freeXfer(xfer);
 }
 
-PurpleXfer* toxprpl_new_xfer_receive(PurpleConnection* gc, const char* who, int friendnumber, int filenumber,
-                                     const goffset filesize, const char* filename) {
+PurpleXfer* ToxPRPL_Purple_onTransferReceive(PurpleConnection* gc, const char* who, int friendnumber, int filenumber,
+                                             const goffset filesize, const char* filename) {
 
     purple_debug_info("toxprpl", "new_xfer_receive\n");
     toxprpl_return_val_if_fail(gc != NULL, NULL);
@@ -265,13 +265,13 @@ PurpleXfer* toxprpl_new_xfer_receive(PurpleConnection* gc, const char* who, int 
     purple_xfer_set_filename(xfer, filename);
     purple_xfer_set_size(xfer, filesize);
 
-    purple_xfer_set_init_fnc(xfer, toxprpl_xfer_init);
-    purple_xfer_set_start_fnc(xfer, toxprpl_xfer_start);
-    purple_xfer_set_write_fnc(xfer, toxprpl_xfer_write);
-    purple_xfer_set_read_fnc(xfer, toxprpl_xfer_read);
-    purple_xfer_set_request_denied_fnc(xfer, toxprpl_xfer_request_denied);
-    purple_xfer_set_cancel_recv_fnc(xfer, toxprpl_xfer_cancel_recv);
-    purple_xfer_set_end_fnc(xfer, toxprpl_xfer_end);
+    purple_xfer_set_init_fnc(xfer, ToxPRPL_Purple_prepareXfer);
+    purple_xfer_set_start_fnc(xfer, ToxPRPL_Purple_startXfer);
+    purple_xfer_set_write_fnc(xfer, ToxPRPL_Purple_writeXfer);
+    purple_xfer_set_read_fnc(xfer, ToxPRPL_purpleDummyReadXfer);
+    purple_xfer_set_request_denied_fnc(xfer, ToxPRPL_Purple_incomingTransferDenied);
+    purple_xfer_set_cancel_recv_fnc(xfer, ToxPRPL_Purple_cancelIncomingTransfer);
+    purple_xfer_set_end_fnc(xfer, ToxPRPL_Purple_onTransferCompleted);
 
     return xfer;
 }
@@ -280,7 +280,7 @@ PurpleXfer* toxprpl_new_xfer_receive(PurpleConnection* gc, const char* who, int 
  * LibPurple pre-file-send callback to determine whether or not a file can be sent
  * to a given user
  */
-gboolean toxprpl_can_receive_file(PurpleConnection* gc, const char* who) {
+gboolean ToxPRPL_Purple_canReceiveFileCheck(PurpleConnection* gc, const char* who) {
     purple_debug_info("toxprpl", "can_receive_file\n");
 
     toxprpl_return_val_if_fail(gc != NULL, FALSE);
@@ -305,13 +305,13 @@ gboolean toxprpl_can_receive_file(PurpleConnection* gc, const char* who) {
 /*
  * LibPurple callback invoked when the frontend wishes to send a file to a user
  */
-void toxprpl_send_file(PurpleConnection* gc, const char* who, const char* filename) {
+void ToxPRPL_Purple_sendFile(PurpleConnection* gc, const char* who, const char* filename) {
     purple_debug_info("toxprpl", "send_file\n");
 
     toxprpl_return_if_fail(gc != NULL);
     toxprpl_return_if_fail(who != NULL);
 
-    PurpleXfer* xfer = toxprpl_new_xfer(gc, who);
+    PurpleXfer* xfer = ToxPRPL_newXfer(gc, who);
     toxprpl_return_if_fail(xfer != NULL);
 
     if (filename != NULL) {
