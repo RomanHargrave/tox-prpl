@@ -1,6 +1,7 @@
 #include <toxprpl.h>
 #include <toxprpl/account.h>
 #include <string.h>
+#include <toxprpl_data.h>
 
 
 /*
@@ -198,6 +199,11 @@ void toxprpl_add_to_buddylist(toxprpl_accept_friend_data* data) {
                                 toxprpl_statuses[toxprpl_get_status_index(plugin->tox, ret, userstatus)].id,
                                 NULL);
 
+    g_free(data->buddy_key);
+    g_free(data);
+}
+
+void toxprpl_do_not_add_to_buddylist(toxprpl_accept_friend_data* data) {
     g_free(data->buddy_key);
     g_free(data);
 }
