@@ -85,11 +85,11 @@ PurpleCmdRet ToxPRPL_Command_nick(PurpleConversation*, const gchar*, gchar**, gc
 
 void ToxPRPL_Tox_onUserConnectionStatusChange(Tox*, int32_t, uint8_t, void*);
 
-void ToxPRPL_Tox_onFriendRequest(struct Tox*, uint8_t *, uint8_t *, uint16_t, void*);
+void ToxPRPL_Tox_onFriendRequest(struct Tox*, uint8_t const *, uint8_t const *, uint16_t, void*);
 
-void ToxPRPL_Tox_onFriendAction(Tox*, int32_t, uint8_t *, uint16_t, void*);
+void ToxPRPL_Tox_onFriendAction(Tox*, int32_t, uint8_t const *, uint16_t, void*);
 
-void ToxPRPL_Tox_onFriendChangeNickname(Tox*, int32_t, uint8_t *, uint16_t, void*);
+void ToxPRPL_Tox_onFriendChangeNickname(Tox*, int32_t, uint8_t const *, uint16_t, void*);
 
 void ToxPRPL_Tox_onFriendChangeStatus(struct Tox*, int32_t, uint8_t, void*);
 
@@ -97,7 +97,7 @@ void ToxPRPL_Tox_onFriendChangeStatus(struct Tox*, int32_t, uint8_t, void*);
  * In file ``tox/chat.c''
  */
 
-void ToxPRPL_Tox_onMessageReceived(Tox*, int32_t, uint8_t *, uint16_t, void*);
+void ToxPRPL_Tox_onMessageReceived(Tox*, int32_t, uint8_t const *, uint16_t, void*);
 
 void ToxPRPL_Tox_onUserTypingChange(Tox*, int32_t, uint8_t, void*);
 
@@ -401,7 +401,7 @@ void ToxPRPL_configureToxAndConnect(PurpleAccount* acct) {
 
     purple_debug_info("toxprpl", "Will connect to %s:%d (%s)\n", ip, port, key);
 
-    if (tox_bootstrap_from_address(tox, ip, TOXPRPL_USE_IPV6, port, publicKey) == 0) {
+    if (tox_bootstrap_from_address(tox, ip, port, publicKey) == 0) {
         purple_connection_error_reason(gc, PURPLE_CONNECTION_ERROR_NETWORK_ERROR, _("server invalid or not found"));
         g_free(publicKey);
         tox_kill(tox);

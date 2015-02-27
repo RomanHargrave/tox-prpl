@@ -5,7 +5,7 @@
 
 #include <toxprpl.h>
 
-void ToxPRPL_Tox_onMessageReceived(Tox* tox, int32_t friendnum, uint8_t *string, uint16_t length,
+void ToxPRPL_Tox_onMessageReceived(Tox* tox, int32_t friendnum, uint8_t const *string, uint16_t length,
                                    void* user_data) {
     purple_debug_info("toxprpl", "Message received!\n");
     PurpleConnection* gc = (PurpleConnection*) user_data;
