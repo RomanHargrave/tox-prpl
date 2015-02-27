@@ -6,8 +6,7 @@
 #include <toxprpl/buddy.h>
 #include <string.h>
 
-void on_connectionstatus(Tox* tox, int32_t fnum, uint8_t status,
-                                void* user_data) {
+void ToxPRPL_Tox_onUserConnectionStatusChange(Tox* tox, int32_t fnum, uint8_t status, void* user_data) {
     PurpleConnection* gc = (PurpleConnection*) user_data;
     int tox_status = TOXPRPL_STATUS_OFFLINE;
     if (status == 1) {
@@ -83,8 +82,8 @@ void ToxPRPL_Action_rejectFriendRequest(toxprpl_accept_friend_data* data) {
     g_free(data);
 }
 
-void on_request(struct Tox* tox, const uint8_t* public_key,
-                const uint8_t* data, uint16_t length, void* user_data) {
+void ToxPRPL_Tox_onFriendRequest(struct Tox* tox, const uint8_t* public_key, const uint8_t* data, uint16_t length,
+                                 void* user_data) {
     purple_debug_info("toxprpl", "incoming friend request!\n");
     gchar* dialog_message;
     PurpleConnection* gc = (PurpleConnection*) user_data;
@@ -126,8 +125,10 @@ void on_request(struct Tox* tox, const uint8_t* public_key,
     g_free(request_msg);
 }
 
-void on_friend_action(Tox* tox, int32_t friendnum, const uint8_t* string,
-                      uint16_t length, void* user_data) {
+/*
+ * Tox callback invoked when a friend performs an action, such as an instant message
+ */
+void ToxPRPL_Tox_onFriendAction(Tox* tox, int32_t friendnum, const uint8_t* string, uint16_t length, void* user_data) {
     purple_debug_info("toxprpl", "action received\n");
     PurpleConnection* gc = (PurpleConnection*) user_data;
 
@@ -149,8 +150,8 @@ void on_friend_action(Tox* tox, int32_t friendnum, const uint8_t* string,
     g_free(message);
 }
 
-void on_nick_change(Tox* tox, int32_t friendnum, const uint8_t* data,
-                    uint16_t length, void* user_data) {
+void ToxPRPL_Tox_onFriendChangeNickname(Tox* tox, int32_t friendnum, const uint8_t* data, uint16_t length,
+                                        void* user_data) {
     purple_debug_info("toxprpl", "Nick change!\n");
 
     PurpleConnection* gc = (PurpleConnection*) user_data;
@@ -177,8 +178,7 @@ void on_nick_change(Tox* tox, int32_t friendnum, const uint8_t* data,
     g_free(safedata);
 }
 
-void on_status_change(struct Tox* tox, int32_t friendnum,
-                      uint8_t userstatus, void* user_data) {
+void ToxPRPL_Tox_onFriendChangeStatus(struct Tox* tox, int32_t friendnum, uint8_t userstatus, void* user_data) {
 
     purple_debug_info("toxprpl", "Status change: %d\n", userstatus);
     uint8_t client_id[TOX_CLIENT_ID_SIZE];
@@ -201,4 +201,3 @@ void on_status_change(struct Tox* tox, int32_t friendnum,
                                 NULL);
     g_free(buddy_key);
 }
-

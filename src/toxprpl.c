@@ -83,15 +83,15 @@ PurpleCmdRet ToxPRPL_Command_nick(PurpleConversation*, const gchar*, gchar**, gc
  * In file ``tox/buddy.c''
  */
 
-void on_connectionstatus(Tox*, int32_t, uint8_t, void*);
+void ToxPRPL_Tox_onUserConnectionStatusChange(Tox*, int32_t, uint8_t, void*);
 
-void on_request(struct Tox*, const uint8_t*, const uint8_t*, uint16_t, void*);
+void ToxPRPL_Tox_onFriendRequest(struct Tox*, const uint8_t*, const uint8_t*, uint16_t, void*);
 
-void on_friend_action(Tox*, int32_t, const uint8_t*, uint16_t, void*);
+void ToxPRPL_Tox_onFriendAction(Tox*, int32_t, const uint8_t*, uint16_t, void*);
 
-void on_nick_change(Tox*, int32_t, const uint8_t*, uint16_t, void*);
+void ToxPRPL_Tox_onFriendChangeNickname(Tox*, int32_t, const uint8_t*, uint16_t, void*);
 
-void on_status_change(struct Tox*, int32_t, uint8_t, void*);
+void ToxPRPL_Tox_onFriendChangeStatus(struct Tox*, int32_t, uint8_t, void*);
 
 /*
  * In file ``tox/chat.c''
@@ -345,12 +345,12 @@ void toxprpl_login_after_setup(PurpleAccount* acct) {
 
     }
 
-    tox_callback_connection_status(tox, on_connectionstatus, gc);
-    tox_callback_friend_request(tox, on_request, gc);
-    tox_callback_friend_action(tox, on_friend_action, gc);
+    tox_callback_connection_status(tox, ToxPRPL_Tox_onUserConnectionStatusChange, gc);
+    tox_callback_friend_request(tox, ToxPRPL_Tox_onFriendRequest, gc);
+    tox_callback_friend_action(tox, ToxPRPL_Tox_onFriendAction, gc);
     tox_callback_friend_message(tox, on_incoming_message, gc);
-    tox_callback_name_change(tox, on_nick_change, gc);
-    tox_callback_user_status(tox, on_status_change, gc);
+    tox_callback_name_change(tox, ToxPRPL_Tox_onFriendChangeNickname, gc);
+    tox_callback_user_status(tox, ToxPRPL_Tox_onFriendChangeStatus, gc);
     tox_callback_typing_change(tox, on_typing_change, gc);
 
     /*
