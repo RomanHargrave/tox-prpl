@@ -356,9 +356,9 @@ void toxprpl_login_after_setup(PurpleAccount* acct) {
     /*
      * Implemented in ``common/xfers.c''
      */
-    tox_callback_file_send_request(tox, on_file_send_request, gc);
-    tox_callback_file_control(tox, on_file_control, gc);
-    tox_callback_file_data(tox, on_file_data, gc);
+    tox_callback_file_send_request(tox, ToxPRPL_Tox_onFileRequest, gc);
+    tox_callback_file_control(tox, ToxPRPL_Tox_onFileControl, gc);
+    tox_callback_file_data(tox, ToxPRPL_Tox_onFileDataReceive, gc);
 
     purple_debug_info("toxprpl", "initialized tox callbacks\n");
 
