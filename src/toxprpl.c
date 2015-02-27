@@ -132,7 +132,7 @@ gboolean tox_connection_check(gpointer gc) {
         // query status of all buddies
         PurpleAccount* account = purple_connection_get_account(gc);
         GSList* buddy_list = purple_find_buddies(account, NULL);
-        g_slist_foreach(buddy_list, toxprpl_query_buddy_info, gc);
+        g_slist_foreach(buddy_list, ToxPRPL_Purple_getBuddyInfo, gc);
         g_slist_free(buddy_list);
 
         uint8_t our_name[TOX_MAX_NAME_LENGTH + 1];
@@ -587,7 +587,7 @@ static PurplePluginProtocolInfo prpl_info = {
          * in order to get the icon.
          * This does not return image data, just a string.
          */
-        .list_icon = toxprpl_list_icon,
+        .list_icon = ToxPRPL_Purple_getListIconForUser,
 
         /*
          * Function which will return a buddy/user's status text
@@ -621,10 +621,10 @@ static PurplePluginProtocolInfo prpl_info = {
          * Replace add_buddy, add_buddies respectively
          * Whether plural add should be implemented depends on further reading of the documentation
          */
-        .add_buddy_with_invite = toxprpl_add_buddy,
+        .add_buddy_with_invite = ToxPRPL_Purple_addBuddy,
         .add_buddies_with_invite = NULL,
 
-        .remove_buddy = toxprpl_remove_buddy,
+        .remove_buddy = ToxPRPL_Purple_removeBuddy,
         .remove_buddies = NULL,
 
         /*

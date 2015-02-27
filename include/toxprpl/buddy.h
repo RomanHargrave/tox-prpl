@@ -1,18 +1,18 @@
 #pragma once
 #include <toxprpl.h>
 
-int toxprpl_tox_add_friend(Tox*, PurpleConnection*, const char*, gboolean, const char*);
+int ToxPRPL_Purple_addFriend(Tox*, PurpleConnection*, const char*, gboolean, const char*);
 
-void toxprpl_query_buddy_info(gpointer, gpointer);
+void ToxPRPL_Purple_getBuddyInfo(gpointer, gpointer);
 
-void toxprpl_remove_buddy(PurpleConnection* gc, PurpleBuddy* buddy, PurpleGroup* group);
+void ToxPRPL_Purple_removeBuddy(PurpleConnection* gc, PurpleBuddy* buddy, PurpleGroup* group);
 
-void toxprpl_add_buddy(PurpleConnection*, PurpleBuddy*, PurpleGroup*, const char*);
+void ToxPRPL_Purple_addBuddy(PurpleConnection*, PurpleBuddy*, PurpleGroup*, const char*);
 
-void toxprpl_add_to_buddylist(toxprpl_accept_friend_data*);
+void ToxPRPL_Action_acceptFriendRequest(toxprpl_accept_friend_data*);
 
-void toxprpl_do_not_add_to_buddylist(toxprpl_accept_friend_data*);
+void ToxPRPL_Action_rejectFriendRequest(toxprpl_accept_friend_data*);
 
-const char* toxprpl_list_icon(PurpleAccount*, PurpleBuddy*);
+const char* ToxPRPL_Purple_getListIconForUser(PurpleAccount*, PurpleBuddy*);
 
 

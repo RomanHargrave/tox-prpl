@@ -4,6 +4,7 @@
 
 #include <toxprpl.h>
 #include <toxprpl/buddy.h>
+#include <string.h>
 
 void on_connectionstatus(Tox* tox, int32_t fnum, uint8_t status,
                                 void* user_data) {
@@ -26,6 +27,60 @@ void on_connectionstatus(Tox* tox, int32_t fnum, uint8_t status,
     purple_prpl_got_user_status(account, buddy_key,
                                 toxprpl_statuses[tox_status].id, NULL);
     g_free(buddy_key);
+}
+
+/*
+ * Tox/Purple glue dialog action that handles acceptance of a friend request
+ */
+void ToxPRPL_Action_acceptFriendRequest(toxprpl_accept_friend_data* data) {
+    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(data->gc);
+
+    int ret = ToxPRPL_Purple_addFriend(plugin->tox, data->gc, data->buddy_key,
+                                       FALSE, NULL);
+    if (ret < 0) {
+        g_free(data->buddy_key);
+        g_free(data);
+        // error dialogs handled in ToxPRPL_Purple_addFriend()
+        return;
+    }
+
+    PurpleAccount* account = purple_connection_get_account(data->gc);
+
+    uint8_t alias[TOX_MAX_NAME_LENGTH + 1];
+
+    PurpleBuddy* buddy;
+    int rc = tox_get_name(plugin->tox, ret, alias);
+    alias[TOX_MAX_NAME_LENGTH] = '\0';
+    if ((rc == 0) && (strlen((const char*) alias) > 0)) {
+        purple_debug_info("toxprpl", "Got friend alias %s\n", alias);
+        buddy = purple_buddy_new(account, data->buddy_key, (const char*) alias);
+    }
+    else {
+        purple_debug_info("toxprpl", "Adding [%s]\n", data->buddy_key);
+        buddy = purple_buddy_new(account, data->buddy_key, NULL);
+    }
+
+    toxprpl_buddy_data* buddy_data = g_new0(toxprpl_buddy_data, 1);
+    buddy_data->tox_friendlist_number = ret;
+    purple_buddy_set_protocol_data(buddy, buddy_data);
+    purple_blist_add_buddy(buddy, NULL, NULL, NULL);
+    TOX_USERSTATUS userstatus = (TOX_USERSTATUS) tox_get_user_status(plugin->tox, ret);
+    purple_debug_info("toxprpl", "Friend %s has status %d\n",
+                      data->buddy_key, userstatus);
+    purple_prpl_got_user_status(account, data->buddy_key,
+                                toxprpl_statuses[toxprpl_get_status_index(plugin->tox, ret, userstatus)].id,
+                                NULL);
+
+    g_free(data->buddy_key);
+    g_free(data);
+}
+
+/*
+ * Tox/Purple glue dialog action that handles rejection (ignore) of a friend request
+ */
+void ToxPRPL_Action_rejectFriendRequest(toxprpl_accept_friend_data* data) {
+    g_free(data->buddy_key);
+    g_free(data);
 }
 
 void on_request(struct Tox* tox, const uint8_t* public_key,
@@ -65,8 +120,8 @@ void on_request(struct Tox* tox, const uint8_t* public_key,
                           account, NULL,
                           NULL,
                           fdata, // buddy key will be freed elsewhere
-                          G_CALLBACK(toxprpl_add_to_buddylist),
-                          G_CALLBACK(toxprpl_do_not_add_to_buddylist));
+                          G_CALLBACK(ToxPRPL_Action_acceptFriendRequest),
+                          G_CALLBACK(ToxPRPL_Action_rejectFriendRequest));
     g_free(dialog_message);
     g_free(request_msg);
 }
