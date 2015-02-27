@@ -65,7 +65,9 @@ void toxprpl_login(PurpleAccount* acct);
  * - on_file_data
  */
 void on_file_control(Tox*, int32_t, uint8_t, uint8_t, uint8_t, const uint8_t*, uint16_t, void*);
+
 void on_file_send_request(Tox*, int32_t, uint8_t, uint64_t, const uint8_t*, uint16_t, void*);
+
 void on_file_data(Tox*, int32_t, uint8_t, const uint8_t*, uint16_t, void*);
 
 /*
@@ -75,7 +77,9 @@ void on_file_data(Tox*, int32_t, uint8_t, const uint8_t*, uint16_t, void*);
  * - toxprpl_new_xfer
  */
 gboolean toxprpl_can_receive_file(PurpleConnection*, const char*);
+
 void toxprpl_send_file(PurpleConnection*, const char*, const char*);
+
 PurpleXfer* toxprpl_new_xfer(PurpleConnection*, const gchar*);
 
 // End of file transfer functions --------------------------------------------------------------------------------------
@@ -84,10 +88,15 @@ PurpleXfer* toxprpl_new_xfer(PurpleConnection*, const gchar*);
 // LibPurple Buddy Backend ----------------------------------
 
 int toxprpl_tox_add_friend(Tox*, PurpleConnection*, const char*, gboolean, const char*);
+
 void toxprpl_query_buddy_info(gpointer, gpointer);
+
 void toxprpl_remove_buddy(PurpleConnection* gc, PurpleBuddy* buddy, PurpleGroup* group);
+
 void toxprpl_add_buddy(PurpleConnection*, PurpleBuddy*, PurpleGroup*, const char*);
+
 void toxprpl_add_to_buddylist(toxprpl_accept_friend_data*);
+
 const char* toxprpl_list_icon(PurpleAccount*, PurpleBuddy*);
 
 // End buddy backend ----------------------------------------
@@ -99,6 +108,20 @@ int toxprpl_send_im(PurpleConnection*, const char*, const char*, PurpleMessageFl
 unsigned int toxprpl_send_typing(PurpleConnection*, const char*, PurpleTypingState);
 
 // end prpl chat functions --------------------------------------------
+
+// PRPL Commands -------------------------------------------------------------------------------------------------------
+
+/*
+ * /myid command
+ */
+static PurpleCmdRet toxprpl_myid_cmd_cb(PurpleConversation*, const gchar*, gchar**, gchar**, void*);
+
+/*
+ * /nick command
+ */
+static PurpleCmdRet toxprpl_nick_cmd_cb(PurpleConversation*, const gchar*, gchar**, gchar**, void*);
+
+// End PRPL Commands ---------------------------------------------------------------------------------------------------
 
 // Tox Callbacks -------------------------------------------------------------------------------------------------------
 
@@ -372,6 +395,8 @@ gboolean tox_connection_check(gpointer gc) {
 }
 
 
+// PRPL API Backend ----------------------------------------------------------------------------------------------------
+
 /*
  * Returns potential status types
  * Called only by libpurple
@@ -395,17 +420,7 @@ static GList* toxprpl_status_types(PurpleAccount* acct) {
     return types;
 }
 
-/*
- * /myid command
- */
-static PurpleCmdRet toxprpl_myid_cmd_cb(PurpleConversation*, const gchar*, gchar**, gchar**, void*);
-
-/*
- * /nick command
- */
-static PurpleCmdRet toxprpl_nick_cmd_cb(PurpleConversation*, const gchar*, gchar**, gchar**, void*);
-
-// toxprpl_sync_friends ------------------------------------------------
+// ---- toxprpl_sync_friends -------------------------------------------------------------------------------------------
 
 /*
  * Called by toxprpl_sync_friends
@@ -511,12 +526,34 @@ static void toxprpl_sync_friends(PurpleAccount* acct, Tox* tox) {
     g_free(friendlist);
 }
 
-// end toxprpl_sync_friends -------------------------------------------
+// ---- end toxprpl_sync_friends ---------------------------------------------------------------------------------------
+
+
+/*
+ * Opens a dialog prompting the user to import a preexisting tox database
+ */
+static void toxprpl_user_ask_import(PurpleAccount* acct) {
+    purple_debug_info("toxprpl", "ask to import user account\n");
+    PurpleConnection* gc = purple_account_get_connection(acct);
+
+    purple_request_file(gc,
+                        _("Import existing Tox account data"),
+                        NULL,
+                        FALSE,
+                        G_CALLBACK(toxprpl_user_import),
+                        G_CALLBACK(toxprpl_login),
+                        acct,
+                        NULL,
+                        NULL,
+                        acct);
+}
+
+// ---- login/logout functions -----------------------------------------------------------------------------------------
 
 /*
  * Start Tox and register all callbacks
  */
-static void toxprpl_login_after_setup(PurpleAccount* acct) {
+void toxprpl_login_after_setup(PurpleAccount* acct) {
     purple_debug_info("toxprpl", "logging in...\n");
 
     PurpleConnection* gc = purple_account_get_connection(acct);
@@ -643,27 +680,6 @@ static void toxprpl_login_after_setup(PurpleAccount* acct) {
 }
 
 /*
- * Opens a dialog prompting the user to import a preexisting tox database
- */
-static void toxprpl_user_ask_import(PurpleAccount* acct) {
-    purple_debug_info("toxprpl", "ask to import user account\n");
-    PurpleConnection* gc = purple_account_get_connection(acct);
-
-    purple_request_file(gc,
-                        _("Import existing Tox account data"),
-                        NULL,
-                        FALSE,
-                        G_CALLBACK(toxprpl_user_import),
-                        G_CALLBACK(toxprpl_login),
-                        acct,
-                        NULL,
-                        NULL,
-                        acct);
-}
-
-// login/logout functions -------------------------------------------
-
-/*
  * LibPurple login implementation
  * This is also used by ToxPRPL as the callback function for certain dialogues
  */
@@ -705,7 +721,7 @@ void toxprpl_login(PurpleAccount* acct) {
  * LibPurple close callback
  * This should clean up and end the Tox session
  */
-static void toxprpl_close(PurpleConnection* gc) {
+void toxprpl_close(PurpleConnection* gc) {
     /* notify other toxprpl accounts */
     purple_debug_info("toxprpl", "Closing!\n");
 
@@ -739,7 +755,7 @@ static void toxprpl_close(PurpleConnection* gc) {
     g_free(plugin);
 }
 
-// end login/logout ---------------------------------------------------
+// ---- end login/logout -----------------------------------------------------------------------------------------------
 
 /*
  * LibPurple callback to destruct a buddy
@@ -751,174 +767,193 @@ static void toxprpl_free_buddy(PurpleBuddy* buddy) {
     }
 }
 
-// PRPL initialization happens below this line
+// ---- plugin initialization ------------------------------------------------------------------------------------------
 
-static PurplePluginProtocolInfo prpl_info =
-        {
-                // Protocol ------------------------------------------------------------------------------------
+static PurplePluginProtocolInfo prpl_info = {
+        // Protocol ----------------------------------------------------------------------------------------------------
 
-                .options = OPT_PROTO_NO_PASSWORD | OPT_PROTO_REGISTER_NOSCREENNAME | OPT_PROTO_INVITE_MESSAGE,
+        .options = OPT_PROTO_NO_PASSWORD | OPT_PROTO_REGISTER_NOSCREENNAME | OPT_PROTO_INVITE_MESSAGE,
 
-                .login = toxprpl_login,
-                .close = toxprpl_close,
+        .login = toxprpl_login,
+        .close = toxprpl_close,
 
-                // .user_splits is assigned in toxprpl_init
-                // .protocol_options is assign in toxprpl_init
+        // .user_splits is assigned in toxprpl_init
+        // .protocol_options is assign in toxprpl_init
 
-                // Self ----------------------------------------------------------------------------------------
+        // Self --------------------------------------------------------------------------------------------------------
 
-                /*
-                 * set_status lives inside ``purple/account.c''
-                 */
-                .set_status = toxprpl_set_status,
+        /*
+         * set_status lives inside ``purple/account.c''
+         */
+        .set_status = toxprpl_set_status,
 
-                // Buddy Icons, status -------------------------------------------------------------------------
+        // Buddy Icons, status -----------------------------------------------------------------------------------------
 
-                /*
-                 *  Right now, this is a null implementation of PurpleBuddyIconSpec
-                 *  For tox support, this will need to describe
-                 *  - format: png
-                 *  - width constraints describing least and worst case image sizes from tox
-                 *  - largest possible filesize that can be returned by tox
-                 *  - scale: preserve ratio
-                 *
-                 *  How this is handled in reality depends on the frontent implementation.
-                 *  Pidgin should be pretty obediant.
-                 */
-                .icon_spec = NO_BUDDY_ICONS,
+        /*
+         *  Right now, this is a null implementation of PurpleBuddyIconSpec
+         *  For tox support, this will need to describe
+         *  - format: png
+         *  - width constraints describing least and worst case image sizes from tox
+         *  - largest possible filesize that can be returned by tox
+         *  - scale: preserve ratio
+         *
+         *  How this is handled in reality depends on the frontent implementation.
+         *  Pidgin should be pretty obediant.
+         */
+        .icon_spec = NO_BUDDY_ICONS,
 
-                /*
-                 * If the icon spec is changed to support protocol icons,
-                 * this `toxpripl_list_icon` should return the name to pass to tox
-                 * in order to get the icon.
-                 * This does not return image data, just a string.
-                 */
-                .list_icon = toxprpl_list_icon,
+        /*
+         * If the icon spec is changed to support protocol icons,
+         * this `toxpripl_list_icon` should return the name to pass to tox
+         * in order to get the icon.
+         * This does not return image data, just a string.
+         */
+        .list_icon = toxprpl_list_icon,
 
-                /*
-                 * Function which will return a buddy/user's status text
-                 */
-                .status_text = NULL,
+        /*
+         * Function which will return a buddy/user's status text
+         */
+        .status_text = NULL,
 
-                /*
-                 * Possible states for any user
-                 */
-                .status_types = toxprpl_status_types,
+        /*
+         * Possible states for any user
+         */
+        .status_types = toxprpl_status_types,
 
-                /*
-                 * Buddy tooltip.
-                 * Perhaps the Tox id could go here, for quick reference
-                 */
-                .tooltip_text = NULL,
+        /*
+         * Buddy tooltip.
+         * Perhaps the Tox id could go here, for quick reference
+         */
+        .tooltip_text = NULL,
 
-                /*
-                 * Buddy menu additions,
-                 * perhaps a `copy id` function could go here
-                 */
-                .blist_node_menu = NULL,
+        /*
+         * Buddy menu additions,
+         * perhaps a `copy id` function could go here
+         */
+        .blist_node_menu = NULL,
 
-                // Buddy Management ----------------------------------------------------------------------------
+        // Buddy Management --------------------------------------------------------------------------------------------
 
-                /*
-                 * These (and dependant) functions may be found in ``purple/buddy.c''
-                 */
+        /*
+         * These (and dependant) functions may be found in ``purple/buddy.c''
+         */
 
-                /*
-                 * Replace add_buddy, add_buddies respectively
-                 * Whether plural add should be implemented depends on further reading of the documentation
-                 */
-                .add_buddy_with_invite = toxprpl_add_buddy,
-                .add_buddies_with_invite = NULL,
+        /*
+         * Replace add_buddy, add_buddies respectively
+         * Whether plural add should be implemented depends on further reading of the documentation
+         */
+        .add_buddy_with_invite = toxprpl_add_buddy,
+        .add_buddies_with_invite = NULL,
 
-                .remove_buddy = toxprpl_remove_buddy,
-                .remove_buddies = NULL,
+        .remove_buddy = toxprpl_remove_buddy,
+        .remove_buddies = NULL,
 
-                /*
-                 * Blocking methods.
-                 * No significant documentation is available, but names lend themselves to being understood.
-                 */
-                .add_permit = NULL,
-                .add_deny = NULL,
-                .rem_permit = NULL,
-                .rem_deny = NULL,
-                .set_permit_deny = NULL,
+        /*
+         * Blocking methods.
+         * No significant documentation is available, but names lend themselves to being understood.
+         */
+        .add_permit = NULL,
+        .add_deny = NULL,
+        .rem_permit = NULL,
+        .rem_deny = NULL,
+        .set_permit_deny = NULL,
 
-                // All Chats -----------------------------------------------------------------------------------
+        // All Chats ---------------------------------------------------------------------------------------------------
 
-                /*
-                 * These functions may be found in ``purple/chat.c''
-                 */
+        /*
+         * These functions may be found in ``purple/chat.c''
+         */
 
-                .send_im = toxprpl_send_im,
-                .send_typing = toxprpl_send_typing,
-                .offline_message = NULL,
+        .send_im = toxprpl_send_im,
+        .send_typing = toxprpl_send_typing,
+        .offline_message = NULL,
 
-                // Group Chats ---------------------------------------------------------------------------------
+        // Group Chats -------------------------------------------------------------------------------------------------
 
-                /*
-                 * Called when the frontend wants to join a chat
-                 * Parameter components is as `chat_info` unless the user has accepted an invite,
-                 * in which case it is as in `serv_got_chat_invite`
-                 */
-                .join_chat = NULL,
+        /*
+         * Called when the frontend wants to join a chat
+         * Parameter components is as `chat_info` unless the user has accepted an invite,
+         * in which case it is as in `serv_got_chat_invite`
+         */
+        .join_chat = NULL,
 
-                /*
-                 * Returns a list of chats in which the user is enrolled
-                 */
-                .chat_info = NULL,
+        /*
+         * Returns a list of chats in which the user is enrolled
+         */
+        .chat_info = NULL,
 
-                /*
-                 * Returns a map representing default chat options
-                 */
-                .chat_info_defaults = NULL,
+        /*
+         * Returns a map representing default chat options
+         */
+        .chat_info_defaults = NULL,
 
-                /*
-                 * Called when the frontend rejects a chat invite
-                 */
-                .reject_chat = NULL,
+        /*
+         * Called when the frontend rejects a chat invite
+         */
+        .reject_chat = NULL,
 
-                /*
-                 * Get the display name of a chat from the internal representation
-                 */
-                .get_chat_name = NULL,
+        /*
+         * Get the display name of a chat from the internal representation
+         */
+        .get_chat_name = NULL,
 
-                /*
-                 * Invite a user, `who`, to join chat `id`, with message `message`
-                 */
-                .chat_invite = NULL,
+        /*
+         * Invite a user, `who`, to join chat `id`, with message `message`
+         */
+        .chat_invite = NULL,
 
-                /*
-                 * Leave chat `id`
-                 */
-                .chat_leave = NULL,
+        /*
+         * Leave chat `id`
+         */
+        .chat_leave = NULL,
 
-                /*
-                 * Send a message in a chat, `id`.
-                 */
-                .chat_send = NULL,
+        /*
+         * Send a message in a chat, `id`.
+         */
+        .chat_send = NULL,
 
-                /*
-                 * Set a group title
-                 */
-                .set_chat_topic = NULL,
+        /*
+         * Set a group title
+         */
+        .set_chat_topic = NULL,
 
-                // File transfers ------------------------------------------------------------------------------
-                // These and related functions are defined in ``impl/xfers.c''
+        // File transfers ----------------------------------------------------------------------------------------------
 
-                .can_receive_file   = toxprpl_can_receive_file,
-                .send_file          = toxprpl_send_file,
-                .new_xfer           = toxprpl_new_xfer,
+        // These and related functions are defined in ``impl/xfers.c''
 
-                // ToxAV ---------------------------------------------------------------------------------------
+        .can_receive_file   = toxprpl_can_receive_file,
+        .send_file          = toxprpl_send_file,
+        .new_xfer           = toxprpl_new_xfer,
 
-                .initiate_media = NULL,
-                .get_media_caps = NULL,
+        // ToxAV -------------------------------------------------------------------------------------------------------
 
-                // API -----------------------------------------------------------------------------------------
+        .initiate_media = NULL,
+        .get_media_caps = NULL,
 
-                .buddy_free = toxprpl_free_buddy,
-                .struct_size = sizeof(PurplePluginProtocolInfo),
-        };
+        // API ---------------------------------------------------------------------------------------------------------
+
+        .buddy_free = toxprpl_free_buddy,
+        .struct_size = sizeof(PurplePluginProtocolInfo),
+};
+
+static PurplePluginInfo info = {
+        .magic = PURPLE_PLUGIN_MAGIC,
+        .major_version = PURPLE_MAJOR_VERSION,
+        .minor_version = PURPLE_MINOR_VERSION,
+        .type = PURPLE_PLUGIN_PROTOCOL,
+        .priority = PURPLE_PRIORITY_DEFAULT,
+
+        .id = TOXPRPL_ID,
+        .name = "Tox",
+        .version = VERSION,
+        .summary = "Tox Protocol Plugin",
+        .description = "Tox Protocol Plugin http://tox.im/",
+        .author = "Sergey 'Jin' Bostandzhyan",
+        .homepage = PACKAGE_URL,
+
+        .extra_info = &prpl_info,
+        .actions = toxprpl_account_actions,
+};
 
 static void toxprpl_init(PurplePlugin* plugin) {
     purple_debug_info("toxprpl", "starting up\n");
@@ -943,25 +978,5 @@ static void toxprpl_init(PurplePlugin* plugin) {
                                                option);
     purple_debug_info("toxprpl", "initialization complete\n");
 }
-
-static PurplePluginInfo info =
-        {
-                .magic = PURPLE_PLUGIN_MAGIC,
-                .major_version = PURPLE_MAJOR_VERSION,
-                .minor_version = PURPLE_MINOR_VERSION,
-                .type = PURPLE_PLUGIN_PROTOCOL,
-                .priority = PURPLE_PRIORITY_DEFAULT,
-
-                .id = TOXPRPL_ID,
-                .name = "Tox",
-                .version = VERSION,
-                .summary = "Tox Protocol Plugin",
-                .description = "Tox Protocol Plugin http://tox.im/",
-                .author = "Sergey 'Jin' Bostandzhyan",
-                .homepage = PACKAGE_URL,
-
-                .extra_info = &prpl_info,
-                .actions = toxprpl_account_actions,
-        };
 
 PURPLE_INIT_PLUGIN(tox, toxprpl_init, info);
