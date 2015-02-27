@@ -80,6 +80,26 @@ PurpleXfer* toxprpl_new_xfer(PurpleConnection*, const gchar*);
 
 // End of file transfer functions --------------------------------------------------------------------------------------
 
+
+// LibPurple Buddy Backend ----------------------------------
+
+int toxprpl_tox_add_friend(Tox*, PurpleConnection*, const char*, gboolean, const char*);
+void toxprpl_query_buddy_info(gpointer, gpointer);
+void toxprpl_remove_buddy(PurpleConnection* gc, PurpleBuddy* buddy, PurpleGroup* group);
+void toxprpl_add_buddy(PurpleConnection*, PurpleBuddy*, PurpleGroup*, const char*);
+void toxprpl_add_to_buddylist(toxprpl_accept_friend_data*);
+const char* toxprpl_list_icon(PurpleAccount*, PurpleBuddy*);
+
+// End buddy backend ----------------------------------------
+
+// prpl chat functions ------------------------------------------------
+
+int toxprpl_send_im(PurpleConnection*, const char*, const char*, PurpleMessageFlags);
+
+unsigned int toxprpl_send_typing(PurpleConnection*, const char*, PurpleTypingState);
+
+// end prpl chat functions --------------------------------------------
+
 // Tox Callbacks -------------------------------------------------------------------------------------------------------
 
 static void on_connectionstatus(Tox* tox, int32_t fnum, uint8_t status,
@@ -245,8 +265,6 @@ static void on_status_change(struct Tox* tox, int32_t friendnum,
     g_free(buddy_key);
 }
 
-
-
 void on_typing_change(Tox* tox, int32_t friendnum, uint8_t is_typing,
                       void* userdata) {
     purple_debug_info("toxprpl", "Friend typing status change: %d", friendnum);
@@ -282,39 +300,6 @@ void on_typing_change(Tox* tox, int32_t friendnum, uint8_t is_typing,
 }
 
 // End of Tox Callbacks ------------------------------------------------------------------------------------------------
-
-// LibPurple Account Backend --------------------------------
-
-/*
- * Purple callback for the nickname settings dialog
- */
-void toxprpl_set_nick_action(PurpleConnection*, const char*);
-
-/*
- * LibPurple callback that is invoked when the frontend wants to set the user status
- */
-void toxprpl_set_status(PurpleAccount*, PurpleStatus*);
-
-// End LibPurple Account Backend ----------------------------
-
-// LibPurple Buddy Backend ----------------------------------
-
-int toxprpl_tox_add_friend(Tox*, PurpleConnection*, const char*, gboolean, const char*);
-void toxprpl_query_buddy_info(gpointer, gpointer);
-void toxprpl_remove_buddy(PurpleConnection* gc, PurpleBuddy* buddy, PurpleGroup* group);
-void toxprpl_add_buddy(PurpleConnection*, PurpleBuddy*, PurpleGroup*, const char*);
-void toxprpl_add_to_buddylist(toxprpl_accept_friend_data*);
-const char* toxprpl_list_icon(PurpleAccount*, PurpleBuddy*);
-
-// End buddy backend ----------------------------------------
-
-// prpl chat functions ------------------------------------------------
-
-int toxprpl_send_im(PurpleConnection*, const char*, const char*, PurpleMessageFlags);
-
-unsigned int toxprpl_send_typing(PurpleConnection*, const char*, PurpleTypingState);
-
-// end prpl chat functions --------------------------------------------
 
 /*
  * Keep Tox active
@@ -413,36 +398,12 @@ static GList* toxprpl_status_types(PurpleAccount* acct) {
 /*
  * /myid command
  */
-static PurpleCmdRet toxprpl_myid_cmd_cb(PurpleConversation* conv,
-                                        const gchar* cmd, gchar** args, gchar** error, void* data) {
-    purple_debug_info("toxprpl", "/myid command detected\n");
-    PurpleConnection* gc = (PurpleConnection*) data;
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
-
-    uint8_t bin_id[TOX_FRIEND_ADDRESS_SIZE];
-    tox_get_address(plugin->tox, bin_id);
-    gchar* id = toxprpl_tox_friend_id_to_string(bin_id);
-
-    gchar* message = g_strdup_printf(_("If someone wants to add you, give them "
-                                               "this id: %s"), id);
-
-    purple_conversation_write(conv, NULL, message, PURPLE_MESSAGE_SYSTEM,
-                              time(NULL));
-    g_free(id);
-    g_free(message);
-    return PURPLE_CMD_RET_OK;
-}
+static PurpleCmdRet toxprpl_myid_cmd_cb(PurpleConversation*, const gchar*, gchar**, gchar**, void*);
 
 /*
  * /nick command
  */
-static PurpleCmdRet toxprpl_nick_cmd_cb(PurpleConversation* conv,
-                                        const gchar* cmd, gchar** args, gchar** error, void* data) {
-    purple_debug_info("toxprpl", "/nick %s command detected\n", args[0]);
-    PurpleConnection* gc = (PurpleConnection*) data;
-    toxprpl_set_nick_action(gc, args[0]);
-    return PURPLE_CMD_RET_OK;
-}
+static PurpleCmdRet toxprpl_nick_cmd_cb(PurpleConversation*, const gchar*, gchar**, gchar**, void*);
 
 // toxprpl_sync_friends ------------------------------------------------
 

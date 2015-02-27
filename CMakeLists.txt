@@ -29,6 +29,7 @@ set(SOURCE_FILES
 	src/purple/account.c
 	src/purple/buddy.c
 	src/purple/chat.c
+	src/purple/commands.c
 	src/tox/buddy.c
 	src/impl/xfers.c
 	src/toxprpl.c)
