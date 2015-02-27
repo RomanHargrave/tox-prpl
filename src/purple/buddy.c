@@ -70,7 +70,7 @@ int ToxPRPL_Purple_addFriend(Tox* tox, PurpleConnection* gc, const char* buddy_k
 
 /*
  * Retrieve the current status of the given buddy
- * This is called by ``ToxPRPL_Purple_addBuddy'' and ``tox_connection_check''
+ * This is called by ``ToxPRPL_Purple_addBuddy'' and ``ToxPRPL_updateClientStatus''
  */
 void ToxPRPL_Purple_getBuddyInfo(gpointer data, gpointer user_data) {
     purple_debug_info("toxprpl", "ToxPRPL_Purple_getBuddyInfo\n");

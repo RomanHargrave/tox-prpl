@@ -30,7 +30,7 @@ void ToxPRPL_importUser(PurpleAccount* acct, const char* filename) {
                               _("Error"),
                               _("Could not access account data file:"),
                               filename,
-                              (PurpleNotifyCloseCallback) toxprpl_login,
+                              (PurpleNotifyCloseCallback) ToxPRPL_initializePRPL,
                               acct);
         return;
     }
@@ -41,7 +41,7 @@ void ToxPRPL_importUser(PurpleAccount* acct, const char* filename) {
                               _("Error"),
                               _("Account data file seems to be invalid"),
                               NULL,
-                              (PurpleNotifyCloseCallback) toxprpl_login,
+                              (PurpleNotifyCloseCallback) ToxPRPL_initializePRPL,
                               acct);
         return;
     }
@@ -53,7 +53,7 @@ void ToxPRPL_importUser(PurpleAccount* acct, const char* filename) {
                               _("Error"),
                               _("Could not open account data file:"),
                               strerror(errno),
-                              (PurpleNotifyCloseCallback) toxprpl_login,
+                              (PurpleNotifyCloseCallback) ToxPRPL_initializePRPL,
                               acct);
         return;
     }
@@ -69,7 +69,7 @@ void ToxPRPL_importUser(PurpleAccount* acct, const char* filename) {
                                   _("Error"),
                                   _("Could not read account data file:"),
                                   strerror(errno),
-                                  (PurpleNotifyCloseCallback) toxprpl_login,
+                                  (PurpleNotifyCloseCallback) ToxPRPL_initializePRPL,
                                   acct);
             g_free(account_data);
             close(fd);
@@ -83,7 +83,7 @@ void ToxPRPL_importUser(PurpleAccount* acct, const char* filename) {
     purple_account_set_string(acct, "messenger", msg64);
     g_free(msg64);
     g_free(account_data);
-    toxprpl_login(acct);
+    ToxPRPL_initializePRPL(acct);
     close(fd);
 }
 
@@ -128,7 +128,7 @@ void ToxPRPL_exportUser(PurpleConnection* gc, const char* filename) {
                                       _("Error"),
                                       _("Could not save account data file:"),
                                       strerror(errno),
-                                      (PurpleNotifyCloseCallback) toxprpl_login,
+                                      (PurpleNotifyCloseCallback) ToxPRPL_initializePRPL,
                                       account);
                 g_free(account_data);
                 close(fd);

@@ -3,4 +3,4 @@
  */
 #pragma once
 
-void toxprpl_login(PurpleAccount* acct);
+void ToxPRPL_initializePRPL(PurpleAccount* acct);
