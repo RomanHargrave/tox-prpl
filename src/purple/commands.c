@@ -9,8 +9,7 @@
 /*
  * /myid command
  */
-PurpleCmdRet toxprpl_myid_cmd_cb(PurpleConversation* conv,
-                                        const gchar* cmd, gchar** args, gchar** error, void* data) {
+PurpleCmdRet ToxPRPL_Command_myId(PurpleConversation* conv, const gchar* cmd, gchar** args, gchar** error, void* data) {
     purple_debug_info("toxprpl", "/myid command detected\n");
     PurpleConnection* gc = (PurpleConnection*) data;
     toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
@@ -32,8 +31,7 @@ PurpleCmdRet toxprpl_myid_cmd_cb(PurpleConversation* conv,
 /*
  * /nick command
  */
-PurpleCmdRet toxprpl_nick_cmd_cb(PurpleConversation* conv,
-                                        const gchar* cmd, gchar** args, gchar** error, void* data) {
+PurpleCmdRet ToxPRPL_Command_nick(PurpleConversation* conv, const gchar* cmd, gchar** args, gchar** error, void* data) {
     purple_debug_info("toxprpl", "/nick %s command detected\n", args[0]);
     PurpleConnection* gc = (PurpleConnection*) data;
     ToxPRPL_Purple_onSetNickname(gc, args[0]);

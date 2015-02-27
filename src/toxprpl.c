@@ -68,12 +68,12 @@ unsigned int ToxPRPL_Purple_updateTypingState(PurpleConnection*, const char*, Pu
 /*
  * /myid command
  */
-static PurpleCmdRet toxprpl_myid_cmd_cb(PurpleConversation*, const gchar*, gchar**, gchar**, void*);
+PurpleCmdRet ToxPRPL_Command_myId(PurpleConversation*, const gchar*, gchar**, gchar**, void*);
 
 /*
  * /nick command
  */
-static PurpleCmdRet toxprpl_nick_cmd_cb(PurpleConversation*, const gchar*, gchar**, gchar**, void*);
+PurpleCmdRet ToxPRPL_Command_nick(PurpleConversation*, const gchar*, gchar**, gchar**, void*);
 
 // End PRPL Commands ---------------------------------------------------------------------------------------------------
 
@@ -436,11 +436,11 @@ void toxprpl_login_after_setup(PurpleAccount* acct) {
 
     plugin->myid_command_id = purple_cmd_register("myid", "",
                                                   PURPLE_CMD_P_DEFAULT, PURPLE_CMD_FLAG_IM | PURPLE_CMD_FLAG_CHAT,
-                                                  TOXPRPL_ID, toxprpl_myid_cmd_cb, myid_help, gc);
+                                                  TOXPRPL_ID, ToxPRPL_Command_myId, myid_help, gc);
 
     plugin->nick_command_id = purple_cmd_register("nick", "s",
                                                   PURPLE_CMD_P_DEFAULT, PURPLE_CMD_FLAG_IM | PURPLE_CMD_FLAG_CHAT,
-                                                  TOXPRPL_ID, toxprpl_nick_cmd_cb, nick_help, gc);
+                                                  TOXPRPL_ID, ToxPRPL_Command_nick, nick_help, gc);
 
     const char* nick = purple_account_get_string(acct, "nickname", NULL);
     if (!nick || (strlen(nick) == 0)) {
