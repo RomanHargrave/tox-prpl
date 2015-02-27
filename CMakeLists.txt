@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 project(tox-prpl)
+set(CMAKE_BUILD_TYPE Release)
 
 add_definitions(
 	-DVERSION="0.4.2"
@@ -39,6 +40,6 @@ set(SOURCE_FILES
 
 include_directories(include)
 
-add_library(toxprpl ${SOURCE_FILES})
+add_library(toxprpl SHARED ${SOURCE_FILES})
 
 target_link_libraries(toxprpl ${LIBS})
