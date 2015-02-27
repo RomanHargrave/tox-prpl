@@ -31,6 +31,7 @@ set(SOURCE_FILES
 	src/purple/chat.c
 	src/purple/commands.c
 	src/tox/buddy.c
+	src/tox/chat.c
 	src/impl/xfers.c
 	src/toxprpl.c)
 

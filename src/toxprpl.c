@@ -105,95 +105,19 @@ static PurpleCmdRet toxprpl_nick_cmd_cb(PurpleConversation*, const gchar*, gchar
 
 // Tox Callbacks -------------------------------------------------------------------------------------------------------
 
-void on_connectionstatus(Tox* tox, int32_t fnum, uint8_t status,
-                                void* user_data) {
-    PurpleConnection* gc = (PurpleConnection*) user_data;
-    int tox_status = TOXPRPL_STATUS_OFFLINE;
-    if (status == 1) {
-        tox_status = TOXPRPL_STATUS_ONLINE;
-    }
+void on_connectionstatus(Tox*, int32_t, uint8_t, void*);
 
-    purple_debug_info("toxprpl", "Friend status change: %d\n", status);
-    uint8_t client_id[TOX_CLIENT_ID_SIZE];
-    if (tox_get_client_id(tox, fnum, client_id) < 0) {
-        purple_debug_info("toxprpl", "Could not get id of friend #%d\n",
-                          fnum);
-        return;
-    }
+void on_request(struct Tox*, const uint8_t*, const uint8_t*, uint16_t, void*);
 
-    gchar* buddy_key = toxprpl_tox_bin_id_to_string(client_id);
-    PurpleAccount* account = purple_connection_get_account(gc);
-    purple_prpl_got_user_status(account, buddy_key,
-                                toxprpl_statuses[tox_status].id, NULL);
-    g_free(buddy_key);
-}
+void on_friend_action(Tox*, int32_t, const uint8_t*, uint16_t, void*);
 
-void on_request(struct Tox* tox, const uint8_t* public_key,
-                       const uint8_t* data, uint16_t length, void* user_data);
+void on_incoming_message(Tox*, int32_t, const uint8_t*, uint16_t, void*);
 
-void on_friend_action(Tox* tox, int32_t friendnum, const uint8_t* string,
-                             uint16_t length, void* user_data);
+void on_nick_change(Tox*, int32_t, const uint8_t*, uint16_t, void*);
 
-void on_incoming_message(Tox* tox, int32_t friendnum,
-                                const uint8_t* string,
-                                uint16_t length, void* user_data) {
-    purple_debug_info("toxprpl", "Message received!\n");
-    PurpleConnection* gc = (PurpleConnection*) user_data;
+void on_status_change(struct Tox*, int32_t, uint8_t, void*);
 
-    uint8_t client_id[TOX_CLIENT_ID_SIZE];
-    if (tox_get_client_id(tox, friendnum, client_id) < 0) {
-        purple_debug_info("toxprpl", "Could not get id of friend %d\n",
-                          friendnum);
-        return;
-    }
-
-    gchar* buddy_key = toxprpl_tox_bin_id_to_string(client_id);
-    gchar* safemsg = g_strndup((const char*) string, length);
-    serv_got_im(gc, buddy_key, safemsg, PURPLE_MESSAGE_RECV,
-                time(NULL));
-    g_free(buddy_key);
-    g_free(safemsg);
-}
-
-void on_nick_change(Tox* tox, int32_t friendnum, const uint8_t* data,
-                           uint16_t length, void* user_data);
-
-void on_status_change(struct Tox* tox, int32_t friendnum,
-                             uint8_t userstatus, void* user_data);
-
-void on_typing_change(Tox* tox, int32_t friendnum, uint8_t is_typing,
-                      void* userdata) {
-    purple_debug_info("toxprpl", "Friend typing status change: %d", friendnum);
-
-    PurpleConnection* gc = userdata;
-    toxprpl_return_if_fail(gc != NULL);
-
-    uint8_t client_id[TOX_CLIENT_ID_SIZE];
-    if (tox_get_client_id(tox, friendnum, client_id) < 0) {
-        purple_debug_info("toxprpl", "Could not get id of friend %d\n",
-                          friendnum);
-        return;
-    }
-
-    gchar* buddy_key = toxprpl_tox_bin_id_to_string(client_id);
-    PurpleAccount* account = purple_connection_get_account(gc);
-    PurpleBuddy* buddy = purple_find_buddy(account, buddy_key);
-    if (buddy == NULL) {
-        purple_debug_info("toxprpl", "Ignoring typing change because buddy %s was not found\n", buddy_key);
-        g_free(buddy_key);
-        return;
-    }
-
-    g_free(buddy_key);
-
-    if (is_typing) {
-        serv_got_typing(gc, buddy->name, 5, PURPLE_TYPING);
-        /*   ^ timeout for typing status (0 = disabled) */
-    }
-    else {
-        serv_got_typing_stopped(gc, buddy->name);
-    }
-}
+void on_typing_change(Tox*, int32_t, uint8_t, void*);
 
 // End of Tox Callbacks ------------------------------------------------------------------------------------------------
 

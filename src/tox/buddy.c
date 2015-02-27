@@ -5,6 +5,29 @@
 #include <toxprpl.h>
 #include <toxprpl/buddy.h>
 
+void on_connectionstatus(Tox* tox, int32_t fnum, uint8_t status,
+                                void* user_data) {
+    PurpleConnection* gc = (PurpleConnection*) user_data;
+    int tox_status = TOXPRPL_STATUS_OFFLINE;
+    if (status == 1) {
+        tox_status = TOXPRPL_STATUS_ONLINE;
+    }
+
+    purple_debug_info("toxprpl", "Friend status change: %d\n", status);
+    uint8_t client_id[TOX_CLIENT_ID_SIZE];
+    if (tox_get_client_id(tox, fnum, client_id) < 0) {
+        purple_debug_info("toxprpl", "Could not get id of friend #%d\n",
+                          fnum);
+        return;
+    }
+
+    gchar* buddy_key = toxprpl_tox_bin_id_to_string(client_id);
+    PurpleAccount* account = purple_connection_get_account(gc);
+    purple_prpl_got_user_status(account, buddy_key,
+                                toxprpl_statuses[tox_status].id, NULL);
+    g_free(buddy_key);
+}
+
 void on_request(struct Tox* tox, const uint8_t* public_key,
                 const uint8_t* data, uint16_t length, void* user_data) {
     purple_debug_info("toxprpl", "incoming friend request!\n");
