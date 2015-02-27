@@ -97,9 +97,9 @@ void ToxPRPL_Tox_onFriendChangeStatus(struct Tox*, int32_t, uint8_t, void*);
  * In file ``tox/chat.c''
  */
 
-void on_incoming_message(Tox*, int32_t, const uint8_t*, uint16_t, void*);
+void ToxPRPL_Tox_onMessageReceived(Tox*, int32_t, const uint8_t*, uint16_t, void*);
 
-void on_typing_change(Tox*, int32_t, uint8_t, void*);
+void ToxPRPL_Tox_onUserTypingChange(Tox*, int32_t, uint8_t, void*);
 
 // End of Tox Callbacks ------------------------------------------------------------------------------------------------
 
@@ -348,10 +348,10 @@ void toxprpl_login_after_setup(PurpleAccount* acct) {
     tox_callback_connection_status(tox, ToxPRPL_Tox_onUserConnectionStatusChange, gc);
     tox_callback_friend_request(tox, ToxPRPL_Tox_onFriendRequest, gc);
     tox_callback_friend_action(tox, ToxPRPL_Tox_onFriendAction, gc);
-    tox_callback_friend_message(tox, on_incoming_message, gc);
+    tox_callback_friend_message(tox, ToxPRPL_Tox_onMessageReceived, gc);
     tox_callback_name_change(tox, ToxPRPL_Tox_onFriendChangeNickname, gc);
     tox_callback_user_status(tox, ToxPRPL_Tox_onFriendChangeStatus, gc);
-    tox_callback_typing_change(tox, on_typing_change, gc);
+    tox_callback_typing_change(tox, ToxPRPL_Tox_onUserTypingChange, gc);
 
     /*
      * Implemented in ``common/xfers.c''

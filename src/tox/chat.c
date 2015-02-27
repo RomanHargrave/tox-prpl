@@ -5,9 +5,8 @@
 
 #include <toxprpl.h>
 
-void on_incoming_message(Tox* tox, int32_t friendnum,
-                                const uint8_t* string,
-                                uint16_t length, void* user_data) {
+void ToxPRPL_Tox_onMessageReceived(Tox* tox, int32_t friendnum, const uint8_t* string, uint16_t length,
+                                   void* user_data) {
     purple_debug_info("toxprpl", "Message received!\n");
     PurpleConnection* gc = (PurpleConnection*) user_data;
 
@@ -26,8 +25,7 @@ void on_incoming_message(Tox* tox, int32_t friendnum,
     g_free(safemsg);
 }
 
-void on_typing_change(Tox* tox, int32_t friendnum, uint8_t is_typing,
-                      void* userdata) {
+void ToxPRPL_Tox_onUserTypingChange(Tox* tox, int32_t friendnum, uint8_t is_typing, void* userdata) {
     purple_debug_info("toxprpl", "Friend typing status change: %d", friendnum);
 
     PurpleConnection* gc = userdata;
