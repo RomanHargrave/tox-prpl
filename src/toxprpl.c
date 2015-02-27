@@ -25,8 +25,6 @@
 #endif
 
 #include <string.h>
-#include <time.h>
-
 #include <sys/types.h>
 
 #ifdef __WIN32__
