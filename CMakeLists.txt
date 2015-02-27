@@ -26,6 +26,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 
 set(SOURCE_FILES
 	src/util.c
+	src/purple/account.c
 	src/impl/xfers.c
 	src/toxprpl.c)
 

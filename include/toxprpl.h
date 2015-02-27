@@ -35,11 +35,24 @@
 
 #define DEFAULT_REQUEST_MESSAGE _("Please allow me to add you as a friend!")
 
+// TODO -> enum
 #define TOXPRPL_MAX_STATUS          4
 #define TOXPRPL_STATUS_ONLINE       0
 #define TOXPRPL_STATUS_AWAY         1
 #define TOXPRPL_STATUS_BUSY         2
 #define TOXPRPL_STATUS_OFFLINE      3
+
+/*
+ * Support for inferior operating systems
+ * Defines O_BINARY (inferior and redundant FD mode used by inferior operating systems)
+ */
+#ifndef O_BINARY
+    #ifdef _O_BINARY
+            #define O_BINARY _O_BINARY
+        #else
+            #define O_BINARY 0
+    #endif
+#endif
 
 /*
  * Pidgin bits
