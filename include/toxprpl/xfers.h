@@ -48,9 +48,9 @@ PurpleXfer* ToxPRPL_newXfer(PurpleConnection*, const gchar*);
  * - on_file_end_request
  * - on_file_data
  */
-void ToxPRPL_Tox_onFileControl(Tox*, int32_t, uint8_t, uint8_t, uint8_t, const uint8_t*, uint16_t, void*);
+void ToxPRPL_Tox_onFileControl(Tox*, int32_t, uint8_t, uint8_t, uint8_t, uint8_t *, uint16_t, void*);
 
-void ToxPRPL_Tox_onFileRequest(Tox*, int32_t, uint8_t, uint64_t, const uint8_t*, uint16_t, void*);
+void ToxPRPL_Tox_onFileRequest(Tox*, int32_t, uint8_t, uint64_t, uint8_t *, uint16_t, void*);
 
-void ToxPRPL_Tox_onFileDataReceive(Tox*, int32_t, uint8_t, const uint8_t*, uint16_t, void*);
+void ToxPRPL_Tox_onFileDataReceive(Tox*, int32_t, uint8_t, uint8_t *, uint16_t, void*);
 

@@ -5,7 +5,7 @@
  * Tox file transfer progress callback
  */
 void ToxPRPL_Tox_onFileControl(Tox* tox, int32_t friendnumber, uint8_t receive_send, uint8_t filenumber,
-                               uint8_t control_type, const uint8_t* data, uint16_t length, void* userdata) {
+                               uint8_t control_type, uint8_t *data, uint16_t length, void* userdata) {
     purple_debug_info("toxprpl", "file control: %i (%s) %i\n", friendnumber,
                       receive_send == 0 ? "rx" : "tx", filenumber);
     PurpleConnection* gc = userdata;
@@ -43,7 +43,7 @@ void ToxPRPL_Tox_onFileControl(Tox* tox, int32_t friendnumber, uint8_t receive_s
  * Tox file send request callback
  */
 void ToxPRPL_Tox_onFileRequest(Tox* tox, int32_t friendnumber, uint8_t filenumber, uint64_t filesize,
-                               const uint8_t* filename, uint16_t filename_length, void* userdata) {
+                               uint8_t *filename, uint16_t filename_length, void* userdata) {
     purple_debug_info("toxprpl", "file_send_request: %i %i\n", friendnumber,
                       filenumber);
     PurpleConnection* gc = userdata;
@@ -75,7 +75,7 @@ void ToxPRPL_Tox_onFileRequest(Tox* tox, int32_t friendnumber, uint8_t filenumbe
 /*
  * Tox file transfer data callback
  */
-void ToxPRPL_Tox_onFileDataReceive(Tox* tox, int32_t friendnumber, uint8_t filenumber, const uint8_t* data,
+void ToxPRPL_Tox_onFileDataReceive(Tox* tox, int32_t friendnumber, uint8_t filenumber, uint8_t *data,
                                    uint16_t length, void* userdata) {
     PurpleConnection* gc = userdata;
 

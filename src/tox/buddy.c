@@ -82,7 +82,7 @@ void ToxPRPL_Action_rejectFriendRequest(toxprpl_accept_friend_data* data) {
     g_free(data);
 }
 
-void ToxPRPL_Tox_onFriendRequest(struct Tox* tox, const uint8_t* public_key, const uint8_t* data, uint16_t length,
+void ToxPRPL_Tox_onFriendRequest(struct Tox* tox, uint8_t* public_key, uint8_t* data, uint16_t length,
                                  void* user_data) {
     purple_debug_info("toxprpl", "incoming friend request!\n");
     gchar* dialog_message;
@@ -128,7 +128,7 @@ void ToxPRPL_Tox_onFriendRequest(struct Tox* tox, const uint8_t* public_key, con
 /*
  * Tox callback invoked when a friend performs an action, such as an instant message
  */
-void ToxPRPL_Tox_onFriendAction(Tox* tox, int32_t friendnum, const uint8_t* string, uint16_t length, void* user_data) {
+void ToxPRPL_Tox_onFriendAction(Tox* tox, int32_t friendnum, uint8_t *string, uint16_t length, void* user_data) {
     purple_debug_info("toxprpl", "action received\n");
     PurpleConnection* gc = (PurpleConnection*) user_data;
 
@@ -150,7 +150,7 @@ void ToxPRPL_Tox_onFriendAction(Tox* tox, int32_t friendnum, const uint8_t* stri
     g_free(message);
 }
 
-void ToxPRPL_Tox_onFriendChangeNickname(Tox* tox, int32_t friendnum, const uint8_t* data, uint16_t length,
+void ToxPRPL_Tox_onFriendChangeNickname(Tox* tox, int32_t friendnum, uint8_t *data, uint16_t length,
                                         void* user_data) {
     purple_debug_info("toxprpl", "Nick change!\n");
 
