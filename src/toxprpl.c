@@ -307,6 +307,14 @@ void toxprpl_add_to_buddylist(toxprpl_accept_friend_data*);
 
 // End buddy backend ----------------------------------------
 
+// prpl chat functions ------------------------------------------------
+
+int toxprpl_send_im(PurpleConnection*, const char*, const char*, PurpleMessageFlags);
+
+unsigned int toxprpl_send_typing(PurpleConnection*, const char*, PurpleTypingState);
+
+// end prpl chat functions --------------------------------------------
+
 /*
  * Keep Tox active
  */
@@ -779,101 +787,6 @@ static void toxprpl_close(PurpleConnection* gc) {
 
 // end login/logout ---------------------------------------------------
 
-// prpl chat functions ------------------------------------------------
-
-/**
-* This PRPL function should return a positive value on success.
-* If the message is too big to be sent, return -E2BIG.  If
-* the account is not connected, return -ENOTCONN.  If the
-* PRPL is unable to send the message for another reason, return
-* some other negative value.  You can use one of the valid
-* errno values, or just big something.  If the message should
-* not be echoed to the conversation window, return 0.
-*/
-int toxprpl_send_im(PurpleConnection* gc, const char* who,
-                           const char* message, PurpleMessageFlags flags) {
-    const char* from_username = gc->account->username;
-
-    purple_debug_info("toxprpl", "sending message from %s to %s\n",
-                      from_username, who);
-
-    int message_sent = -999;
-
-    PurpleAccount* account = purple_connection_get_account(gc);
-    PurpleBuddy* buddy = purple_find_buddy(account, who);
-    if (buddy == NULL) {
-        purple_debug_info("toxprpl", "Can't send message because buddy %s was not found\n", who);
-        return message_sent;
-    }
-    toxprpl_buddy_data* buddy_data = purple_buddy_get_protocol_data(buddy);
-    if (buddy_data == NULL) {
-        purple_debug_info("toxprpl", "Can't send message because tox friend number is unknown\n");
-        return message_sent;
-    }
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
-    char* no_html = purple_markup_strip_html(message);
-
-    if (purple_message_meify(no_html, -1)) {
-        if (tox_send_action(plugin->tox, buddy_data->tox_friendlist_number,
-                            (uint8_t*) no_html, strlen(no_html)) != 0) {
-            message_sent = 1;
-        }
-    }
-    else {
-        if (tox_send_message(plugin->tox, buddy_data->tox_friendlist_number,
-                             (uint8_t*) no_html, strlen(no_html)) != 0) {
-            message_sent = 1;
-        }
-    }
-    if (no_html) {
-        free(no_html);
-    }
-    return message_sent;
-}
-
-
-/*
- * LibPurple typing callback
- */
-static unsigned int toxprpl_send_typing(PurpleConnection* gc, const char* who,
-                                        PurpleTypingState state) {
-    purple_debug_info("toxprpl", "send_typing\n");
-
-    toxprpl_return_val_if_fail(gc != NULL, 0);
-    toxprpl_return_val_if_fail(who != NULL, 0);
-
-    toxprpl_plugin_data* plugin = purple_connection_get_protocol_data(gc);
-    toxprpl_return_val_if_fail(plugin != NULL && plugin->tox != NULL, 0);
-
-    PurpleAccount* account = purple_connection_get_account(gc);
-    toxprpl_return_val_if_fail(account != NULL, 0);
-
-    PurpleBuddy* buddy = purple_find_buddy(account, who);
-    toxprpl_return_val_if_fail(buddy != NULL, 0);
-
-    toxprpl_buddy_data* buddy_data = purple_buddy_get_protocol_data(buddy);
-    toxprpl_return_val_if_fail(buddy_data != NULL, 0);
-
-    switch (state) {
-        case PURPLE_TYPING:
-            purple_debug_info("toxprpl", "Send typing state: TYPING\n");
-            tox_set_user_is_typing(plugin->tox, buddy_data->tox_friendlist_number, TRUE);
-            break;
-
-        case PURPLE_TYPED:
-            purple_debug_info("toxprpl", "Send typing state: TYPED\n"); /* typing pause */
-            tox_set_user_is_typing(plugin->tox, buddy_data->tox_friendlist_number, FALSE);
-            break;
-
-        default:
-            purple_debug_info("toxprpl", "Send typing state: NOT_TYPING\n");
-            tox_set_user_is_typing(plugin->tox, buddy_data->tox_friendlist_number, FALSE);
-            break;
-    }
-
-    return 0;
-}
-
 /*
  * LibPurple callback to destruct a buddy
  */
@@ -900,6 +813,9 @@ static PurplePluginProtocolInfo prpl_info =
 
                 // Self ----------------------------------------------------------------------------------------
 
+                /*
+                 * set_status lives inside ``purple/account.c''
+                 */
                 .set_status = toxprpl_set_status,
 
                 // Buddy Icons, status -------------------------------------------------------------------------
@@ -950,6 +866,10 @@ static PurplePluginProtocolInfo prpl_info =
                 // Buddy Management ----------------------------------------------------------------------------
 
                 /*
+                 * These (and dependant) functions may be found in ``purple/buddy.c''
+                 */
+
+                /*
                  * Replace add_buddy, add_buddies respectively
                  * Whether plural add should be implemented depends on further reading of the documentation
                  */
@@ -970,6 +890,10 @@ static PurplePluginProtocolInfo prpl_info =
                 .set_permit_deny = NULL,
 
                 // All Chats -----------------------------------------------------------------------------------
+
+                /*
+                 * These functions may be found in ``purple/chat.c''
+                 */
 
                 .send_im = toxprpl_send_im,
                 .send_typing = toxprpl_send_typing,
