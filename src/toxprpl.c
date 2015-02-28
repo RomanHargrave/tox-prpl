@@ -44,6 +44,7 @@
 #include <toxprpl/account.h>
 #include <toxprpl/buddy.h>
 #include <toxprpl/xfers.h>
+#include <toxprpl/preferences.h>
 
 void ToxPRPL_initializePRPL(PurpleAccount* acct);
 
@@ -724,6 +725,8 @@ static PurplePluginInfo ToxPRPL_PRPL_Manifest = {
         .author = "Sergey 'Jin' Bostandzhyan",
         .homepage = PACKAGE_URL,
 
+        .prefs_info = NULL,
+
         .extra_info = &ToxPRPL_PRPL_Info,
         .actions = ToxPRPL_Purple_getAccountActions,
 };
@@ -746,6 +749,7 @@ static void ToxPRPL_initPRPL(PurplePlugin* plugin) {
     option = purple_account_option_string_new(_("Server key"),
                                               "dht_server_key", DEFAULT_SERVER_KEY);
     ToxPRPL_PRPL_Info.protocol_options = g_list_append(ToxPRPL_PRPL_Info.protocol_options, option);
+
     purple_debug_info("toxprpl", "initialization complete\n");
 }
 
