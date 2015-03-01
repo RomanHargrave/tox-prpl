@@ -44,7 +44,7 @@
 #include <toxprpl/account.h>
 #include <toxprpl/buddy.h>
 #include <toxprpl/xfers.h>
-#include <toxprpl/preferences.h>
+#include <toxprpl/group_chat.h>
 
 void ToxPRPL_initializePRPL(PurpleAccount* acct);
 
@@ -354,7 +354,57 @@ void ToxPRPL_configureToxAndConnect(PurpleAccount* acct) {
     tox_callback_typing_change(tox, ToxPRPL_Tox_onUserTypingChange, gc);
 
     /*
-     * Implemented in ``common/xfers.c''
+     * Implemented in ``tox/group_chat.c''
+     */
+
+    /*
+     * callback signature
+     *
+     *  (Tox* tox, int32_t friendNumber, uint8_t type,
+     *   const uint8_t* data, uint16_t length, void* userData) => void
+     *
+     *   userData will be the PurpleConnection,
+     *   `length` will be passed to join_groupchat,
+     *   `type` is one of TOX_GROUPCHAT_TYPE_TEXT or TOX_GROUPCHAT_TYPE_AV,
+     *      NOTE: for our purposes, we only want TOX_GROUPCHAT_TYPE_TEXT, as AV is not in the plans
+     *
+     */
+    tox_callback_group_invite(tox, ToxPRPL_Tox_onGroupInvite, gc);
+
+    /*
+     * callback signature
+     *
+     *  (Tox* tox, int groupNumber, int peerNumber, const uint8_t* message,
+     *   uint16_t length, void* userData) => void
+     */
+    tox_callback_group_message(tox, ToxPRPL_Tox_onGroupMessage, gc);
+
+    /*
+     * callback signature
+     *
+     *  (Tox* tox, int groupNumber, int peerNumber, const uint8_t* action,
+     *   uint16_t length, void* userData) => void
+     */
+    tox_callback_group_action(tox, ToxPRPL_Tox_onGroupAction, gc);
+
+    /*
+     * callback signature
+     *
+     *  (Tox* tox, int groupNumber, int peerNumber, uint8_t* title,
+     *   uint8_t length, void* userData) => void
+     */
+    tox_callback_group_title(tox, ToxPRPL_Tox_onGroupChangeTitle, gc);
+
+    /*
+     * callback signature
+     *
+     *  (Tox* tox, int groupNumber, int peerNumber, TOX_CHAT_CHANGE change,
+     *   void* userData) => void
+     */
+    tox_callback_group_namelist_change(tox, ToxPRPL_Tox_onGroupNamelistChange, gc);
+
+    /*
+     * Implemented in ``tox/xfers.c''
      */
     tox_callback_file_send_request(tox, ToxPRPL_Tox_onFileRequest, gc);
     tox_callback_file_control(tox, ToxPRPL_Tox_onFileControl, gc);
@@ -648,46 +698,103 @@ static PurplePluginProtocolInfo ToxPRPL_PRPL_Info = {
          * Called when the frontend wants to join a chat
          * Parameter components is as `chat_info` unless the user has accepted an invite,
          * in which case it is as in `serv_got_chat_invite`
+         *
+         * TODO: Implement
+         *
+         * related tox functions: `tox_add_groupchat`, and `tox_join_groupchat`
+         *
+         * callback signature: (PurpleConnection*, GHashTable* components) => void
          */
         .join_chat = NULL,
 
         /*
          * Returns a list of chats in which the user is enrolled
+         *
+         * TODO: Implement
+         *
+         * related tox functions: `tox_count_chatlist`, and `tox_get_chatlist`
+         *
+         * callback signature: (PurpleConnection*) => GList* [struct proto_chat_entry]
          */
         .chat_info = NULL,
 
         /*
          * Returns a map representing default chat options
+         *
+         * TODO: Implement
+         *
+         * callback signature: (PurpleConnection*, const char* chatName)
+         *                      => GHashTable* [(struct proto_chat_entry) -> char*]
          */
         .chat_info_defaults = NULL,
 
         /*
          * Called when the frontend rejects a chat invite
+         *
+         * TODO: Implement
+         *
+         * no related tox function, just clean up components if necessary
+         *
+         * callback signature: (PurpleConnection*, GHashTable* components) => void
          */
         .reject_chat = NULL,
 
         /*
          * Get the display name of a chat from the internal representation
+         *
+         * TODO: Implement
+         *
+         * related tox function: `tox_group_get_title`
+         *
+         * callback signature: (GHashTable* components) => char*
          */
         .get_chat_name = NULL,
 
         /*
          * Invite a user, `who`, to join chat `id`, with message `message`
+         *
+         * TODO: Implement
+         *
+         * related tox function: `tox_invite_friend`
+         *
+         * callback signature: (PurpleConnection*, int chatId, const char* inviteMessage,
+         *                      const char* buddyName) => void
          */
         .chat_invite = NULL,
 
         /*
          * Leave chat `id`
+         *
+         * TODO: Implement
+         *
+         * related tox function: `tox_del_groupchat`
+         *
+         * callback signature: (PurpleConnection*, int chatId) => void
          */
         .chat_leave = NULL,
 
         /*
          * Send a message in a chat, `id`.
+         *
+         * TODO: Implement
+         *
+         * related tox function: `tox_group_message_send`
+         *
+         * callback signature: (PurpleConnection*, int chatId, const char* message,
+         *                      PurpleMessageFlags flags) => int
+         *
+         *                     returns >= 0 if successful
          */
         .chat_send = NULL,
 
         /*
          * Set a group title
+         *
+         * TODO: Implement
+         *
+         * related tox function: `tox_group_get_title`
+         *
+         * callback signature: (PurpleConnection*, int chatId, const char* topic) => void
          */
         .set_chat_topic = NULL,
 

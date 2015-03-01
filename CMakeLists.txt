@@ -26,16 +26,31 @@ set(LIBS ${LIBS}
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
 
 set(SOURCE_FILES
+
+	# Misc.
 	src/util.c
+
+	# LibPurple Specific
 	src/purple/account.c
-	src/purple/buddy.c
-	src/purple/chat.c
 	src/purple/commands.c
-	src/purple/xfers.c
-	src/tox/buddy.c
+
+	# Chat Backend
 	src/tox/chat.c
-	src/tox/xfers.c
+	src/purple/chat.c
+
+	# Buddy Backend
+	src/tox/buddy.c
+	src/purple/buddy.c
+
+	# Group Chat Backend
+	src/common/group_chat.c
+	src/tox/group_chat.c
+
+	# Transfers Implementation
 	src/common/xfers.c
+	src/tox/xfers.c
+	src/purple/xfers.c
+
 	src/toxprpl.c)
 
 include_directories(include)
